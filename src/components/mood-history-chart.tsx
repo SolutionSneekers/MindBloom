@@ -20,17 +20,20 @@ const valueToMood: { [key: number]: string } = {
   6: "Happy",
 }
 
-const data = [
-  { name: "15 Jul", mood: moodToValue["Sad"] },
-  { name: "16 Jul", mood: moodToValue["Okay"] },
-  { name: "17 Jul", mood: moodToValue["Happy"] },
-  { name: "18 Jul", mood: moodToValue["Calm"] },
-  { name: "19 Jul", mood: moodToValue["Anxious"] },
-  { name: "20 Jul", mood: moodToValue["Happy"] },
-  { name: "21 Jul", mood: moodToValue["Okay"] },
-]
+export interface MoodChartData {
+    name: string;
+    mood: number;
+}
 
-export default function MoodHistoryChart() {
+export default function MoodHistoryChart({ data }: { data: MoodChartData[] }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[350px] text-muted-foreground">
+        No mood data available to display.
+      </div>
+    )
+  }
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>

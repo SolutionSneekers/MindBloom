@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { generateJournalingPrompts } from '@/ai/flows/generate-journaling-prompts';
+import { auth, db } from '@/lib/firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +20,7 @@ export default function JournalPage() {
   const [prompt, setPrompt] = useState<string>('Select a mood to get a journaling prompt.');
   const [journalEntry, setJournalEntry] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<string>('');
 
   useEffect(() => {
@@ -45,12 +49,38 @@ export default function JournalPage() {
     }
   };
   
-  const saveLocally = () => {
-    localStorage.setItem(`journalEntry-${new Date().toISOString()}`, journalEntry);
-    toast({
-      title: "Saved!",
-      description: "Your journal entry has been saved locally.",
-    });
+  const saveToFirestore = async () => {
+    if (!journalEntry || !auth.currentUser) {
+      toast({
+        title: "Error",
+        description: "Journal entry cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await addDoc(collection(db, 'journalEntries'), {
+        userId: auth.currentUser.uid,
+        entry: journalEntry,
+        mood: selectedMood || null,
+        prompt: prompt.startsWith('Select a mood') ? null : prompt,
+        createdAt: serverTimestamp(),
+      });
+      toast({
+        title: "Saved!",
+        description: "Your journal entry has been saved.",
+      });
+    } catch (error) {
+      console.error("Error saving entry: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your journal entry.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const exportAsTxt = () => {
@@ -124,11 +154,12 @@ export default function JournalPage() {
             className="min-h-[300px] text-base"
             value={journalEntry}
             onChange={(e) => setJournalEntry(e.target.value)}
+            disabled={isSaving}
           />
         </CardContent>
         <CardContent className="flex justify-end gap-2">
-           <Button variant="outline" onClick={saveLocally} disabled={!journalEntry}>
-            <Save className="mr-2 h-4 w-4" /> Save Locally
+           <Button variant="outline" onClick={saveToFirestore} disabled={!journalEntry || isSaving}>
+            <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save Entry'}
           </Button>
           <Button onClick={exportAsTxt} disabled={!journalEntry}>
             <Download className="mr-2 h-4 w-4" /> Export as .txt

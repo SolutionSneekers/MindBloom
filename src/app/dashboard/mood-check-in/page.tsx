@@ -2,6 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { auth, db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -20,15 +24,52 @@ const moods = [
 
 export default function MoodCheckInPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [stressLevel, setStressLevel] = useState([5]);
   const [journalEntry, setJournalEntry] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (selectedMood) {
+  const handleSubmit = async () => {
+    if (!selectedMood || !auth.currentUser) {
+      toast({
+        title: "Error",
+        description: "Please select a mood and make sure you're logged in.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+
+    try {
+      const moodLog = {
+        userId: auth.currentUser.uid,
+        mood: selectedMood,
+        stressLevel: stressLevel[0],
+        journalEntry: journalEntry,
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'moods'), moodLog);
+
+      toast({
+        title: "Check-in saved!",
+        description: "Your mood has been logged.",
+      });
+
       router.push(
         `/dashboard/self-care-activities?mood=${selectedMood}&stressLevel=${stressLevel[0]}`
       );
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      toast({
+        title: "Error",
+        description: "Could not save your check-in. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,6 +93,7 @@ export default function MoodCheckInPage() {
                       selectedMood === mood.name ? 'border-primary border-4 bg-accent' : 'border'
                     )}
                     onClick={() => setSelectedMood(mood.name)}
+                    disabled={isLoading}
                   >
                     {mood.emoji}
                   </Button>
@@ -69,6 +111,7 @@ export default function MoodCheckInPage() {
               value={journalEntry}
               onChange={(e) => setJournalEntry(e.target.value)}
               rows={5}
+              disabled={isLoading}
             />
           </div>
 
@@ -81,6 +124,7 @@ export default function MoodCheckInPage() {
                 onValueChange={setStressLevel}
                 max={10}
                 step={1}
+                disabled={isLoading}
               />
               <span className="text-sm text-muted-foreground">High</span>
             </div>
@@ -91,9 +135,9 @@ export default function MoodCheckInPage() {
           <Button
             className="w-full"
             onClick={handleSubmit}
-            disabled={!selectedMood}
+            disabled={!selectedMood || isLoading}
           >
-            Find Self-Care Activities
+            {isLoading ? 'Saving...' : 'Find Self-Care Activities'}
           </Button>
         </CardFooter>
       </Card>
