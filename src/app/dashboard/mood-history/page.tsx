@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useCallback } from "react";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, orderBy, limit, getDocs, Timestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart";
@@ -55,57 +55,53 @@ export default function MoodHistoryPage() {
   const [editStressLevel, setEditStressLevel] = useState([5]);
   const [editJournalEntry, setEditJournalEntry] = useState('');
 
+  const fetchMoodHistory = useCallback(async () => {
+    if (!auth.currentUser) {
+      setLoading(false);
+      setMoodHistoryData([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const q = query(
+        collection(db, "moods"),
+        where("userId", "==", auth.currentUser.uid),
+        orderBy("createdAt", "desc"),
+        limit(30)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      const history: MoodHistoryEntry[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.createdAt) {
+          const createdAt = (data.createdAt as Timestamp).toDate();
+
+          history.push({
+            id: doc.id,
+            date: createdAt.toLocaleDateString(),
+            mood: data.mood,
+            stressLevel: data.stressLevel,
+            journalEntry: data.journalEntry || '',
+          });
+        }
+      });
+
+      setMoodHistoryData(history);
+    } catch (error) {
+      console.error("Error fetching mood history:", error);
+       toast({
+        title: "Error",
+        description: "Could not fetch mood history.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
-    const fetchMoodHistory = async () => {
-      if (!auth.currentUser) {
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      try {
-        const q = query(
-          collection(db, "moods"),
-          where("userId", "==", auth.currentUser.uid),
-          orderBy("createdAt", "desc"),
-          limit(30)
-        );
-        const querySnapshot = await getDocs(q);
-        
-        const history: MoodHistoryEntry[] = [];
-        
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.createdAt) {
-            const createdAt = (data.createdAt as Timestamp).toDate();
-
-            history.push({
-              id: doc.id,
-              date: createdAt.toLocaleDateString(),
-              mood: data.mood,
-              stressLevel: data.stressLevel,
-              journalEntry: data.journalEntry || '',
-            });
-          }
-        });
-
-        const last7Days = history.slice(0, 7).reverse();
-        const chart: MoodChartData[] = last7Days.map(entry => {
-             const date = new Date(entry.date);
-             return {
-                name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
-                mood: moodToValue[entry.mood],
-             };
-        });
-
-        setMoodHistoryData(history);
-        setChartData(chart);
-      } catch (error) {
-        console.error("Error fetching mood history:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const unsubscribe = auth.onAuthStateChanged(user => {
         if (user) {
             fetchMoodHistory();
@@ -117,7 +113,19 @@ export default function MoodHistoryPage() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [fetchMoodHistory]);
+
+  useEffect(() => {
+    const last7Days = moodHistoryData.slice(0, 7).reverse();
+    const newChartData: MoodChartData[] = last7Days.map(entry => {
+         const date = new Date(entry.date);
+         return {
+            name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
+            mood: moodToValue[entry.mood],
+         };
+    });
+    setChartData(newChartData);
+  }, [moodHistoryData]);
 
   const handleOpenEditDialog = (entry: MoodHistoryEntry) => {
     setSelectedEntry(entry);
@@ -137,7 +145,7 @@ export default function MoodHistoryPage() {
     setIsDeleting(true);
     try {
       await deleteDoc(doc(db, "moods", selectedEntry.id));
-      setMoodHistoryData(moodHistoryData.filter(e => e.id !== selectedEntry.id));
+      await fetchMoodHistory();
       toast({
         title: "Success",
         description: "Mood entry deleted.",
@@ -167,13 +175,7 @@ export default function MoodHistoryPage() {
         stressLevel: editStressLevel[0],
         journalEntry: editJournalEntry,
       });
-
-      setMoodHistoryData(moodHistoryData.map(entry => 
-        entry.id === selectedEntry.id 
-        ? { ...entry, mood: editMood, stressLevel: editStressLevel[0], journalEntry: editJournalEntry }
-        : entry
-      ));
-      
+      await fetchMoodHistory();
       toast({
         title: "Success",
         description: "Mood entry updated.",
