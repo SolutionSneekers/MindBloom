@@ -157,22 +157,22 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Profile</h1>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile</h1>
         <p className="text-muted-foreground">Manage your account settings and profile details.</p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>User Profile</CardTitle>
+          <CardTitle className="text-xl">User Profile</CardTitle>
           <CardDescription>This information will be displayed publicly.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
                   <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground text-center sm:text-left">
                     Your avatar is based on the Photo URL you provide. <br />
                     It will also sync with your Google account photo if you signed in with Google.
                 </p>

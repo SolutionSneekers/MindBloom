@@ -197,7 +197,7 @@ export default function MoodHistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Mood History</h1>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">Mood History</h1>
         <p className="text-muted-foreground">
           Review your past mood check-ins and discover patterns.
         </p>
@@ -205,7 +205,7 @@ export default function MoodHistoryPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Mood Trends</CardTitle>
+          <CardTitle className="font-headline text-xl">Mood Trends</CardTitle>
           <CardDescription>
             A visual overview of your mood fluctuations over the last 7 entries.
           </CardDescription>
@@ -217,93 +217,84 @@ export default function MoodHistoryPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Check-in Log</CardTitle>
+          <CardTitle className="font-headline text-xl">Check-in Log</CardTitle>
           <CardDescription>
             A detailed log of your recent mood entries. You can edit or delete entries here.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-             <Table>
+             <div className="space-y-2">
+                {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                ))}
+             </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
                     <TableHead>Mood</TableHead>
-                    <TableHead className="text-center">Stress Level</TableHead>
-                    <TableHead>Journal Snippet</TableHead>
+                    <TableHead className="text-center">Stress</TableHead>
+                    <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {[...Array(5)].map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="h-4 w-4 mx-auto" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-full" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                  {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => (
+                    <TableRow key={entry.id}>
+                       <TableCell className="hidden md:table-cell font-medium">{entry.date}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Badge
+                            variant={
+                              entry.mood === 'Angry' ? 'destructive'
+                              : entry.mood === 'Happy' ? 'default'
+                              : 'secondary'
+                            }
+                            className="w-fit"
+                          >
+                            {entry.mood}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground md:hidden">{entry.date}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">{entry.stressLevel}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <p className="max-w-xs truncate text-muted-foreground italic">
+                          &quot;{entry.journalEntry || 'No journal entry.'}&quot;
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-right">
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                <span>Edit</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Mood</TableHead>
-                  <TableHead className="text-center">Stress Level</TableHead>
-                  <TableHead>Journal Snippet</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="font-medium">{entry.date}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          entry.mood === 'Angry' ? 'destructive'
-                          : entry.mood === 'Happy' ? 'default'
-                          : 'secondary'
-                        }
-                      >
-                        {entry.mood}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">{entry.stressLevel}</TableCell>
-                    <TableCell className="text-muted-foreground italic">
-                      &quot;{entry.journalEntry ? `${entry.journalEntry.substring(0, 50)}...` : 'No journal entry.'}&quot;
-                    </TableCell>
-                    <TableCell className="text-right">
-                       <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              <span>Edit</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              <span>Delete</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            </div>
           )}
         </CardContent>
       </Card>

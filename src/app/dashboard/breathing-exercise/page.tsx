@@ -50,7 +50,7 @@ export default function BreathingExercisePage() {
     <div className="flex flex-col items-center justify-center h-full p-4">
       <Card className="w-full max-w-md overflow-hidden">
         <CardContent className="flex flex-col items-center justify-center p-6 pt-8 space-y-8">
-          <div className="relative flex items-center justify-center w-64 h-64">
+          <div className="relative flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64">
             <div
               className={cn(
                 'absolute bg-accent/30 rounded-full transition-transform duration-[4000ms] ease-in-out',
@@ -63,7 +63,7 @@ export default function BreathingExercisePage() {
               }}
             />
             <div className="relative z-10 text-center">
-              <p className="text-5xl font-bold text-primary">{countdown}</p>
+              <p className="text-4xl font-bold text-primary sm:text-5xl">{countdown}</p>
               <p className="text-lg font-medium text-muted-foreground">{currentPhase.instruction}</p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function BreathingExercisePage() {
         </CardContent>
       </Card>
        <div className="mt-8 text-center">
-        <h1 className="text-2xl font-bold font-headline">Box Breathing</h1>
+        <h1 className="text-xl font-bold sm:text-2xl font-headline">Box Breathing</h1>
         <p className="text-muted-foreground">Inhale (4s) → Hold (4s) → Exhale (6s) → Hold (2s)</p>
       </div>
     </div>

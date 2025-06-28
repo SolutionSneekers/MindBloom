@@ -181,7 +181,7 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-3xl font-bold font-headline tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
           Welcome back{firstName && `, ${firstName}`}!
         </h1>
         <div className="flex items-center space-x-2">
@@ -249,7 +249,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="font-headline">Mood Overview</CardTitle>
+            <CardTitle className="font-headline text-xl">Mood Overview</CardTitle>
             <CardDescription>
               Your mood trends over the last 7 days.
             </CardDescription>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
         </Card>
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
-            <CardTitle className="font-headline">Quick Access</CardTitle>
+            <CardTitle className="font-headline text-xl">Quick Access</CardTitle>
             <CardDescription>
               Jump right into an activity.
             </CardDescription>

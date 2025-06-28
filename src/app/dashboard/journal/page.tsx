@@ -234,7 +234,7 @@ export default function JournalPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">My Journal</h1>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">My Journal</h1>
         <p className="text-muted-foreground">
           A space for your thoughts, guided by AI-powered prompts.
         </p>
@@ -242,12 +242,12 @@ export default function JournalPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="font-headline">Journaling Prompt</CardTitle>
+              <CardTitle className="font-headline text-xl">Journaling Prompt</CardTitle>
               <CardDescription>Select a mood to get a personalized prompt.</CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Select onValueChange={handleGetPrompt} value={selectedMood}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Select a mood" />
@@ -275,7 +275,7 @@ export default function JournalPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">New Entry</CardTitle>
+          <CardTitle className="font-headline text-xl">New Entry</CardTitle>
            <CardDescription>
             {currentDate}
           </CardDescription>
@@ -298,7 +298,7 @@ export default function JournalPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Past Entries</CardTitle>
+          <CardTitle className="font-headline text-xl">Past Entries</CardTitle>
           <CardDescription>Review and manage your previous journal entries.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

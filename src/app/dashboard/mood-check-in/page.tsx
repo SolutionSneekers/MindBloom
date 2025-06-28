@@ -74,10 +74,10 @@ export default function MoodCheckInPage() {
   };
 
   return (
-    <div className="flex justify-center items-start py-8">
+    <div className="flex justify-center items-start py-8 px-4">
       <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">How are you feeling?</CardTitle>
+        <CardHeader className="text-center sm:text-left">
+          <CardTitle className="text-2xl md:text-3xl font-headline">How are you feeling?</CardTitle>
           <CardDescription>Select a mood to describe how you're feeling right now.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -89,7 +89,7 @@ export default function MoodCheckInPage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      'w-20 h-20 rounded-full text-4xl flex items-center justify-center transition-all duration-200 ease-in-out transform hover:scale-110',
+                      'w-full h-auto aspect-square rounded-full text-3xl sm:text-4xl flex items-center justify-center transition-all duration-200 ease-in-out transform hover:scale-110',
                       selectedMood === mood.name ? 'border-primary border-4 bg-accent' : 'border'
                     )}
                     onClick={() => setSelectedMood(mood.name)}
@@ -97,7 +97,7 @@ export default function MoodCheckInPage() {
                   >
                     {mood.emoji}
                   </Button>
-                  <span className="text-sm font-medium">{mood.name}</span>
+                  <span className="text-sm font-medium text-center">{mood.name}</span>
                 </div>
               ))}
             </div>
