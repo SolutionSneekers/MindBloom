@@ -56,15 +56,17 @@ export default function MoodHistoryPage() {
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const createdAt = (data.createdAt as Timestamp).toDate();
+          if (data.createdAt) {
+            const createdAt = (data.createdAt as Timestamp).toDate();
 
-          history.push({
-            id: doc.id,
-            date: createdAt.toLocaleDateString(),
-            mood: data.mood,
-            stressLevel: data.stressLevel,
-            journalSnippet: data.journalEntry ? `${data.journalEntry.substring(0, 50)}...` : 'No journal entry.',
-          });
+            history.push({
+              id: doc.id,
+              date: createdAt.toLocaleDateString(),
+              mood: data.mood,
+              stressLevel: data.stressLevel,
+              journalSnippet: data.journalEntry ? `${data.journalEntry.substring(0, 50)}...` : 'No journal entry.',
+            });
+          }
         });
 
         // For chart, take last 7 entries and format them

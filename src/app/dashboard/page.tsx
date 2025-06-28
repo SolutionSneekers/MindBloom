@@ -78,11 +78,13 @@ export default function DashboardPage() {
         const history: {date: string; mood: string}[] = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const createdAt = (data.createdAt as Timestamp).toDate();
-          history.push({
-            date: createdAt.toLocaleDateString(),
-            mood: data.mood,
-          });
+          if (data.createdAt) {
+            const createdAt = (data.createdAt as Timestamp).toDate();
+            history.push({
+              date: createdAt.toLocaleDateString(),
+              mood: data.mood,
+            });
+          }
         });
 
         const last7Days = history.slice(0, 7).reverse();
