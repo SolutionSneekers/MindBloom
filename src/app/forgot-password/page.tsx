@@ -1,4 +1,7 @@
+'use client'
+
 import Link from "next/link"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +16,8 @@ import { Label } from "@/components/ui/label"
 import { Logo } from "@/components/icons"
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("")
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="mx-auto max-w-sm w-full shadow-lg">
@@ -34,6 +39,8 @@ export default function ForgotPasswordPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <Button type="submit" className="w-full">
