@@ -1,4 +1,7 @@
+'use client'
+
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import {
   Activity,
   ArrowUpRight,
@@ -8,6 +11,8 @@ import {
   TrendingUp,
   Wind,
 } from "lucide-react"
+import { auth, db } from "@/lib/firebase"
+import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "firebase/firestore"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +22,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import MoodHistoryChart from "@/components/mood-history-chart"
+import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const quickAccessItems = [
   {
@@ -43,7 +49,72 @@ const quickAccessItems = [
   },
 ]
 
+const moodToValue: { [key: string]: number } = {
+  Angry: 1, Sad: 2, Anxious: 3, Okay: 4, Calm: 5, Happy: 6,
+};
+
+
 export default function DashboardPage() {
+  const [chartData, setChartData] = useState<MoodChartData[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [checkInCount, setCheckInCount] = useState(0);
+
+  useEffect(() => {
+    const fetchMoodData = async () => {
+      if (!auth.currentUser) {
+        setLoadingData(false);
+        return;
+      }
+      setLoadingData(true);
+      try {
+        const q = query(
+          collection(db, "moods"),
+          where("userId", "==", auth.currentUser.uid),
+          orderBy("createdAt", "desc"),
+          limit(30)
+        );
+        const querySnapshot = await getDocs(q);
+        
+        const history: {date: string; mood: string}[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const createdAt = (data.createdAt as Timestamp).toDate();
+          history.push({
+            date: createdAt.toLocaleDateString(),
+            mood: data.mood,
+          });
+        });
+
+        const last7Days = history.slice(0, 7).reverse();
+        const formattedChartData: MoodChartData[] = last7Days.map(entry => {
+             const date = new Date(entry.date);
+             return {
+                name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
+                mood: moodToValue[entry.mood],
+             };
+        });
+
+        setChartData(formattedChartData);
+        setCheckInCount(querySnapshot.size);
+      } catch (error) {
+        console.error("Error fetching mood data:", error);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    const unsubscribe = auth.onAuthStateChanged(user => {
+        if (user) {
+          fetchMoodData();
+        } else {
+            setLoadingData(false);
+            setChartData([]);
+        }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <>
       <div className="flex items-center justify-between space-y-2">
@@ -81,7 +152,7 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">28</div>
+            <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-10 inline-block" /> : checkInCount}</div>
             <p className="text-xs text-muted-foreground">
               in the last 30 days
             </p>
@@ -121,7 +192,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <MoodHistoryChart />
+            {loadingData ? <Skeleton className="h-[350px] w-full" /> : <MoodHistoryChart data={chartData} />}
           </CardContent>
         </Card>
         <Card className="col-span-4 lg:col-span-3">
