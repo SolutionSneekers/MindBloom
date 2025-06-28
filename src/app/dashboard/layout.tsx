@@ -51,6 +51,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -69,12 +70,13 @@ export default function DashboardLayout({
     router.push('/');
   };
 
-  const NavLinks = ({ className }: { className?: string }) => (
+  const NavLinks = ({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) => (
     <nav className={cn('grid items-start gap-2 text-sm font-medium', className)}>
       {navItems.map(({ href, label, icon: Icon }) => (
         <Link
           key={label}
           href={href}
+          onClick={onLinkClick}
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
             { 'bg-muted text-primary': pathname === href }
@@ -121,7 +123,7 @@ export default function DashboardLayout({
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -133,18 +135,17 @@ export default function DashboardLayout({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
-              <SheetHeader className="absolute">
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-              </SheetHeader>
-              <div className="mb-4">
-                <Link
+               <SheetHeader>
+                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 font-semibold"
+                  className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Logo />
+                   <SheetTitle className="sr-only">Menu</SheetTitle>
                 </Link>
-              </div>
-              <NavLinks />
+              </SheetHeader>
+              <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
