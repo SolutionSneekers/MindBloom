@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
@@ -26,6 +26,11 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,56 +88,60 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                  <Label htmlFor="first-name">Name</Label>
-                  <Input
-                    id="first-name"
-                    placeholder="Max"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isLoading}
-                  />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating account...' : 'Create an account'}
+          {hasMounted && (
+            <>
+              <form onSubmit={handleSignUp}>
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                      <Label htmlFor="first-name">Name</Label>
+                      <Input
+                        id="first-name"
+                        placeholder="Max"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={isLoading}
+                      />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="m@example.com"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Creating account...' : 'Create an account'}
+                  </Button>
+                </div>
+              </form>
+              <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignUp} disabled={isLoading}>
+                Sign up with Google
               </Button>
-            </div>
-          </form>
-          <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignUp} disabled={isLoading}>
-            Sign up with Google
-          </Button>
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/" className="underline">
-              Sign in
-            </Link>
-          </div>
+              <div className="mt-4 text-center text-sm">
+                Already have an account?{" "}
+                <Link href="/" className="underline">
+                  Sign in
+                </Link>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
