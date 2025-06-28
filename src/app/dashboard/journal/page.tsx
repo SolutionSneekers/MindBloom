@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateJournalingPrompts } from '@/ai/flows/generate-journaling-prompts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,11 @@ export default function JournalPage() {
   const [prompt, setPrompt] = useState<string>('Select a mood to get a journaling prompt.');
   const [journalEntry, setJournalEntry] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentDate, setCurrentDate] = useState<string>('');
+
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+  }, []);
 
   const handleGetPrompt = async (mood: string) => {
     setSelectedMood(mood);
@@ -110,7 +115,7 @@ export default function JournalPage() {
         <CardHeader>
           <CardTitle className="font-headline">Today's Entry</CardTitle>
            <CardDescription>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {currentDate}
           </CardDescription>
         </CardHeader>
         <CardContent>
