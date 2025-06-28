@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { auth, db } from "@/lib/firebase"
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "firebase/firestore"
+import { onAuthStateChanged, User } from "firebase/auth"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -59,6 +60,7 @@ export default function DashboardPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [checkInCount, setCheckInCount] = useState(0);
   const [journalStreak, setJournalStreak] = useState(0);
+  const [firstName, setFirstName] = useState('');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -158,14 +160,18 @@ export default function DashboardPage() {
       }
     };
 
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
         if (user) {
+          if (user.displayName) {
+            setFirstName(user.displayName.split(' ')[0]);
+          }
           fetchDashboardData();
         } else {
             setLoadingData(false);
             setChartData([]);
             setCheckInCount(0);
             setJournalStreak(0);
+            setFirstName('');
         }
     });
 
@@ -176,7 +182,7 @@ export default function DashboardPage() {
     <>
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-3xl font-bold font-headline tracking-tight">
-          Welcome back!
+          Welcome back{firstName && `, ${firstName}`}!
         </h1>
         <div className="flex items-center space-x-2">
           <Button asChild>

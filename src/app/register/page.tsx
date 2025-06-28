@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 
@@ -22,7 +22,8 @@ import { Logo } from "@/components/icons"
 export default function RegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const [name, setName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -36,7 +37,10 @@ export default function RegisterPage() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      await updateProfile(userCredential.user, {
+        displayName: `${firstName} ${lastName}`.trim()
+      })
       toast({
         title: "Account created!",
         description: "You have been successfully signed up.",
@@ -92,16 +96,29 @@ export default function RegisterPage() {
             <>
               <form onSubmit={handleSignUp}>
                 <div className="grid gap-4">
-                  <div className="grid gap-2">
-                      <Label htmlFor="first-name">Name</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="first-name">First Name</Label>
                       <Input
                         id="first-name"
                         placeholder="Max"
                         required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         disabled={isLoading}
                       />
+                    </div>
+                     <div className="grid gap-2">
+                      <Label htmlFor="last-name">Last Name</Label>
+                      <Input
+                        id="last-name"
+                        placeholder="Robinson"
+                        required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
