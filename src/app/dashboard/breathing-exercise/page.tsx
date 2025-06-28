@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect } from 'react';
@@ -33,7 +34,7 @@ export default function BreathingExercisePage() {
   }, [isAnimating, countdown, phaseIndex]);
 
   const currentPhase = phases[phaseIndex];
-  const circleSizeClass = currentPhase.name === 'Inhale' ? 'scale-150' : 'scale-100';
+  const circleSizeClass = currentPhase.name === 'Inhale' ? 'scale-110' : 'scale-100';
 
   const handleStartPause = () => {
     setIsAnimating(!isAnimating);
@@ -47,7 +48,7 @@ export default function BreathingExercisePage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md overflow-hidden">
         <CardContent className="flex flex-col items-center justify-center p-6 pt-8 space-y-8">
           <div className="relative flex items-center justify-center w-64 h-64">
             <div
