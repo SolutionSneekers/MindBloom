@@ -22,15 +22,6 @@ const moodToValue: { [key: string]: number } = {
   Angry: 1, Sad: 2, Anxious: 3, Okay: 4, Calm: 5, Happy: 6,
 };
 
-const moodColors: { [key: string]: string } = {
-  Happy: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  Anxious: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  Calm: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  Okay: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  Sad: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-  Angry: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-};
-
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);
   const [chartData, setChartData] = useState<MoodChartData[]>([]);
@@ -166,7 +157,15 @@ export default function MoodHistoryPage() {
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">{entry.date}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={cn(moodColors[entry.mood])}>{entry.mood}</Badge>
+                      <Badge
+                        variant={
+                          entry.mood === 'Angry' ? 'destructive'
+                          : entry.mood === 'Happy' ? 'default'
+                          : 'secondary'
+                        }
+                      >
+                        {entry.mood}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-center">{entry.stressLevel}</TableCell>
                     <TableCell className="text-muted-foreground italic">
