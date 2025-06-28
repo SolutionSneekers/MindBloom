@@ -15,6 +15,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  User as UserIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +39,7 @@ const navItems = [
   { href: '/dashboard/mood-history', label: 'Mood History', icon: History },
   { href: '/dashboard/self-care-activities', label: 'Self-Care', icon: Heart },
   { href: '/dashboard/breathing-exercise', label: 'Breathing', icon: Wind },
+  { href: '/dashboard/profile', label: 'Profile', icon: UserIcon },
 ];
 
 export default function DashboardLayout({
@@ -158,7 +160,12 @@ export default function DashboardLayout({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem><Settings className="mr-2 h-4 w-4" />Settings</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/profile">
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
