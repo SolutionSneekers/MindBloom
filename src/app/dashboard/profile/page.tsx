@@ -17,7 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
 const profileSchema = z.object({
-  displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).max(50, { message: 'Name must be 50 characters or less.' }),
+  firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
+  lastName: z.string().min(1, { message: 'Last name is required.' }).max(50),
   photoURL: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
@@ -38,7 +39,8 @@ export default function ProfilePage() {
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      displayName: '',
+      firstName: '',
+      lastName: '',
       photoURL: '',
     }
   });
@@ -49,8 +51,12 @@ export default function ProfilePage() {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const nameParts = currentUser.displayName?.split(' ') || ['', ''];
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
         reset({
-          displayName: currentUser.displayName || '',
+          firstName: firstName,
+          lastName: lastName,
           photoURL: currentUser.photoURL || '',
         });
       }
@@ -66,7 +72,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       await updateProfile(auth.currentUser, {
-        displayName: data.displayName,
+        displayName: `${data.firstName} ${data.lastName}`.trim(),
         photoURL: data.photoURL,
       });
       setUser(auth.currentUser);
@@ -97,24 +103,38 @@ export default function ProfilePage() {
              <Skeleton className="h-6 w-32 mb-2" />
              <Skeleton className="h-4 w-64" />
           </CardHeader>
-          <CardContent className="space-y-8">
-            <div className="flex items-center space-x-4">
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-6">
               <Skeleton className="h-20 w-20 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-72" />
+                <Skeleton className="h-4 w-80" />
+              </div>
             </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </div>
+
             <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
             </div>
-             <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
+
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-10 w-full" />
             </div>
-             <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-             <div className="flex justify-end">
-              <Skeleton className="h-10 w-32" />
+
+            <div className="flex justify-end">
+                <Skeleton className="h-10 w-32" />
             </div>
           </CardContent>
         </Card>
@@ -157,10 +177,17 @@ export default function ProfilePage() {
                 </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input id="displayName" {...register('displayName')} disabled={isSaving} />
-              {errors.displayName && <p className="text-sm text-destructive">{errors.displayName.message}</p>}
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input id="firstName" {...register('firstName')} disabled={isSaving} />
+                    {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input id="lastName" {...register('lastName')} disabled={isSaving} />
+                    {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
+                </div>
             </div>
 
             <div className="space-y-2">
