@@ -58,25 +58,27 @@ export default function DashboardPage() {
   const [chartData, setChartData] = useState<MoodChartData[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [checkInCount, setCheckInCount] = useState(0);
+  const [journalStreak, setJournalStreak] = useState(0);
 
   useEffect(() => {
-    const fetchMoodData = async () => {
+    const fetchDashboardData = async () => {
       if (!auth.currentUser) {
         setLoadingData(false);
         return;
       }
       setLoadingData(true);
       try {
-        const q = query(
+        // Fetch mood data
+        const moodQuery = query(
           collection(db, "moods"),
           where("userId", "==", auth.currentUser.uid),
           orderBy("createdAt", "desc"),
           limit(30)
         );
-        const querySnapshot = await getDocs(q);
+        const moodSnapshot = await getDocs(moodQuery);
         
         const history: {date: string; mood: string}[] = [];
-        querySnapshot.forEach((doc) => {
+        moodSnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.createdAt) {
             const createdAt = (data.createdAt as Timestamp).toDate();
@@ -97,9 +99,60 @@ export default function DashboardPage() {
         });
 
         setChartData(formattedChartData);
-        setCheckInCount(querySnapshot.size);
+        setCheckInCount(moodSnapshot.size);
+
+        // Fetch journal data for streak
+        const journalQuery = query(
+            collection(db, "journalEntries"),
+            where("userId", "==", auth.currentUser.uid),
+            orderBy("createdAt", "desc")
+        );
+        const journalSnapshot = await getDocs(journalQuery);
+        const entries = journalSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return data.createdAt ? (data.createdAt as Timestamp).toDate() : null;
+        }).filter(date => date !== null) as Date[];
+
+        // Calculate streak
+        if (entries.length === 0) {
+            setJournalStreak(0);
+        } else {
+            let streak = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const uniqueEntryDates = [...new Set(entries.map(d => {
+                const date = new Date(d);
+                date.setHours(0, 0, 0, 0);
+                return date.getTime();
+            }))].map(t => new Date(t));
+
+            uniqueEntryDates.sort((a, b) => b.getTime() - a.getTime());
+            
+            const mostRecentEntry = new Date(uniqueEntryDates[0]);
+            const diffDaysFromToday = (today.getTime() - mostRecentEntry.getTime()) / (1000 * 3600 * 24);
+
+            if (diffDaysFromToday <= 1) {
+                streak = 1;
+                let lastDate = mostRecentEntry;
+                for (let i = 1; i < uniqueEntryDates.length; i++) {
+                    const currentDate = new Date(uniqueEntryDates[i]);
+                    const expectedPreviousDate = new Date(lastDate);
+                    expectedPreviousDate.setDate(expectedPreviousDate.getDate() - 1);
+                    
+                    if (currentDate.getTime() === expectedPreviousDate.getTime()) {
+                        streak++;
+                        lastDate = currentDate;
+                    } else {
+                        break; 
+                    }
+                }
+            }
+            setJournalStreak(streak);
+        }
+
       } catch (error) {
-        console.error("Error fetching mood data:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoadingData(false);
       }
@@ -107,10 +160,12 @@ export default function DashboardPage() {
 
     const unsubscribe = auth.onAuthStateChanged(user => {
         if (user) {
-          fetchMoodData();
+          fetchDashboardData();
         } else {
             setLoadingData(false);
             setChartData([]);
+            setCheckInCount(0);
+            setJournalStreak(0);
         }
     });
 
@@ -140,9 +195,9 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12 days</div>
+            <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-10 inline-block" /> : `${journalStreak} days`}</div>
             <p className="text-xs text-muted-foreground">
-              +5% from last month
+              Keep up the great work!
             </p>
           </CardContent>
         </Card>
