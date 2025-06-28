@@ -122,6 +122,7 @@ export default function MoodCheckInPage() {
               <Slider
                 value={stressLevel}
                 onValueChange={setStressLevel}
+                min={1}
                 max={10}
                 step={1}
                 disabled={isLoading}
