@@ -249,7 +249,7 @@ export default function JournalPage() {
             </div>
             <div className="flex items-center gap-2">
               <Select onValueChange={handleGetPrompt} value={selectedMood}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Select a mood" />
                 </SelectTrigger>
                 <SelectContent>

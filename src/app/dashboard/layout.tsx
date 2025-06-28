@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from 'next/link';
@@ -122,13 +123,14 @@ export default function DashboardLayout({
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        <header className="relative flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
                 className="shrink-0 md:hidden"
+                onClick={() => setIsMobileMenuOpen(true)}
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>
@@ -148,6 +150,11 @@ export default function DashboardLayout({
               <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
             </SheetContent>
           </Sheet>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+              <Logo />
+            </Link>
+          </div>
           <div className="w-full flex-1">
             {/* Can add a search bar here if needed */}
           </div>
