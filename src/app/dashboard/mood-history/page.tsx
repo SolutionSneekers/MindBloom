@@ -1,31 +1,59 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { auth, db } from "@/lib/firebase";
-import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "firebase/firestore";
+import { collection, query, where, orderBy, limit, getDocs, Timestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 interface MoodHistoryEntry {
   id: string;
   date: string;
   mood: string;
   stressLevel: number;
-  journalSnippet: string;
+  journalEntry: string;
 }
 
 const moodToValue: { [key: string]: number } = {
   Angry: 1, Sad: 2, Anxious: 3, Okay: 4, Calm: 5, Happy: 6,
 };
 
+const moods = [
+  { name: 'Happy', emoji: '😄' },
+  { name: 'Calm', emoji: '😌' },
+  { name: 'Okay', emoji: '🙂' },
+  { name: 'Sad', emoji: '😢' },
+  { name: 'Anxious', emoji: '😟' },
+  { name: 'Angry', emoji: '😠' },
+];
+
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);
   const [chartData, setChartData] = useState<MoodChartData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<MoodHistoryEntry | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  const [editMood, setEditMood] = useState('');
+  const [editStressLevel, setEditStressLevel] = useState([5]);
+  const [editJournalEntry, setEditJournalEntry] = useState('');
 
   useEffect(() => {
     const fetchMoodHistory = async () => {
@@ -55,12 +83,11 @@ export default function MoodHistoryPage() {
               date: createdAt.toLocaleDateString(),
               mood: data.mood,
               stressLevel: data.stressLevel,
-              journalSnippet: data.journalEntry ? `${data.journalEntry.substring(0, 50)}...` : 'No journal entry.',
+              journalEntry: data.journalEntry || '',
             });
           }
         });
 
-        // For chart, take last 7 entries and format them
         const last7Days = history.slice(0, 7).reverse();
         const chart: MoodChartData[] = last7Days.map(entry => {
              const date = new Date(entry.date);
@@ -92,6 +119,79 @@ export default function MoodHistoryPage() {
     return () => unsubscribe();
   }, []);
 
+  const handleOpenEditDialog = (entry: MoodHistoryEntry) => {
+    setSelectedEntry(entry);
+    setEditMood(entry.mood);
+    setEditStressLevel([entry.stressLevel]);
+    setEditJournalEntry(entry.journalEntry);
+    setIsEditDialogOpen(true);
+  }
+  
+  const handleOpenDeleteDialog = (entry: MoodHistoryEntry) => {
+    setSelectedEntry(entry);
+    setIsDeleteDialogOpen(true);
+  }
+
+  const handleDeleteEntry = async () => {
+    if (!selectedEntry || !auth.currentUser) return;
+    setIsDeleting(true);
+    try {
+      await deleteDoc(doc(db, "moods", selectedEntry.id));
+      setMoodHistoryData(moodHistoryData.filter(e => e.id !== selectedEntry.id));
+      toast({
+        title: "Success",
+        description: "Mood entry deleted.",
+      });
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+      toast({
+        title: "Error",
+        description: "Could not delete mood entry.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setSelectedEntry(null);
+    }
+  };
+
+  const handleUpdateEntry = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedEntry || !auth.currentUser) return;
+    setIsUpdating(true);
+    try {
+      const entryRef = doc(db, "moods", selectedEntry.id);
+      await updateDoc(entryRef, {
+        mood: editMood,
+        stressLevel: editStressLevel[0],
+        journalEntry: editJournalEntry,
+      });
+
+      setMoodHistoryData(moodHistoryData.map(entry => 
+        entry.id === selectedEntry.id 
+        ? { ...entry, mood: editMood, stressLevel: editStressLevel[0], journalEntry: editJournalEntry }
+        : entry
+      ));
+      
+      toast({
+        title: "Success",
+        description: "Mood entry updated.",
+      });
+    } catch (error) {
+      console.error("Error updating entry:", error);
+       toast({
+        title: "Error",
+        description: "Could not update mood entry.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+      setIsEditDialogOpen(false);
+      setSelectedEntry(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -117,7 +217,7 @@ export default function MoodHistoryPage() {
         <CardHeader>
           <CardTitle className="font-headline">Check-in Log</CardTitle>
           <CardDescription>
-            A detailed log of your recent mood entries.
+            A detailed log of your recent mood entries. You can edit or delete entries here.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -129,6 +229,7 @@ export default function MoodHistoryPage() {
                     <TableHead>Mood</TableHead>
                     <TableHead className="text-center">Stress Level</TableHead>
                     <TableHead>Journal Snippet</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -138,6 +239,7 @@ export default function MoodHistoryPage() {
                       <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
                       <TableCell className="text-center"><Skeleton className="h-4 w-4 mx-auto" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -150,6 +252,7 @@ export default function MoodHistoryPage() {
                   <TableHead>Mood</TableHead>
                   <TableHead className="text-center">Stress Level</TableHead>
                   <TableHead>Journal Snippet</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -169,12 +272,32 @@ export default function MoodHistoryPage() {
                     </TableCell>
                     <TableCell className="text-center">{entry.stressLevel}</TableCell>
                     <TableCell className="text-muted-foreground italic">
-                      &quot;{entry.journalSnippet}&quot;
+                      &quot;{entry.journalEntry ? `${entry.journalEntry.substring(0, 50)}...` : 'No journal entry.'}&quot;
+                    </TableCell>
+                    <TableCell className="text-right">
+                       <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              <span>Edit</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 )) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center h-24">No check-ins yet.</TableCell>
+                    <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -182,6 +305,93 @@ export default function MoodHistoryPage() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+        setIsEditDialogOpen(open);
+        if (!open) setSelectedEntry(null);
+      }}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Mood Entry</DialogTitle>
+            <DialogDescription>
+              Make changes to your mood entry from {selectedEntry?.date}. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateEntry} className="grid gap-6 py-4">
+              <div className="space-y-2">
+                <Label className="text-base font-medium">1. Select your mood</Label>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                  {moods.map((mood) => (
+                    <div key={mood.name} className="flex flex-col items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-16 h-16 rounded-full text-3xl flex items-center justify-center transition-all duration-200 ease-in-out',
+                          editMood === mood.name ? 'border-primary border-4 bg-accent' : 'border'
+                        )}
+                        onClick={() => setEditMood(mood.name)}
+                      >
+                        {mood.emoji}
+                      </Button>
+                      <span className="text-xs font-medium">{mood.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-journal-entry" className="text-base font-medium">2. Journal Entry</Label>
+                <Textarea
+                  id="edit-journal-entry"
+                  placeholder="What's on your mind?"
+                  value={editJournalEntry}
+                  onChange={(e) => setEditJournalEntry(e.target.value)}
+                  rows={4}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-base font-medium">3. Stress level</Label>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">Low</span>
+                  <Slider
+                    value={editStressLevel}
+                    onValueChange={setEditStressLevel}
+                    min={1}
+                    max={10}
+                    step={1}
+                  />
+                  <span className="text-sm text-muted-foreground">High</span>
+                </div>
+                <div className="text-center text-lg font-bold text-primary">{editStressLevel[0]}</div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your mood entry from {selectedEntry?.date}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting} onClick={() => setSelectedEntry(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteEntry} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
