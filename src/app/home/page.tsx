@@ -15,6 +15,7 @@ import {
 import { auth, db } from "@/lib/firebase"
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "firebase/firestore"
 import { onAuthStateChanged, User } from "firebase/auth"
+import { generateDailyAffirmation } from "@/ai/flows/generate-daily-affirmation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -62,6 +63,8 @@ export default function HomePage() {
   const [checkInCount, setCheckInCount] = useState(0);
   const [journalStreak, setJournalStreak] = useState(0);
   const [firstName, setFirstName] = useState('');
+  const [affirmation, setAffirmation] = useState('');
+  const [loadingAffirmation, setLoadingAffirmation] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -160,18 +163,34 @@ export default function HomePage() {
       }
     };
 
+    const fetchAffirmation = async () => {
+      setLoadingAffirmation(true);
+      try {
+        const result = await generateDailyAffirmation();
+        setAffirmation(result.affirmation);
+      } catch (error) {
+        console.error("Error fetching daily affirmation:", error);
+        setAffirmation("I am resilient and can handle whatever comes my way.");
+      } finally {
+        setLoadingAffirmation(false);
+      }
+    };
+
     const unsubscribe = onAuthStateChanged(auth, user => {
         if (user) {
           if (user.displayName) {
             setFirstName(user.displayName.split(' ')[0]);
           }
           fetchDashboardData();
+          fetchAffirmation();
         } else {
             setLoadingData(false);
             setChartData([]);
             setCheckInCount(0);
             setJournalStreak(0);
             setFirstName('');
+            setLoadingAffirmation(false);
+            setAffirmation('');
         }
     });
 
@@ -180,7 +199,7 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
             Welcome back{firstName && `, ${firstName}`}!
@@ -242,9 +261,13 @@ export default function HomePage() {
             <CardTitle className="text-lg font-headline">Daily Affirmation</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-base">
-              &quot;I am resilient and can handle whatever comes my way.&quot;
-            </p>
+            {loadingAffirmation ? (
+              <Skeleton className="h-5 w-3/4 bg-primary-foreground/20" />
+            ) : (
+              <p className="text-base">
+                &quot;{affirmation}&quot;
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
