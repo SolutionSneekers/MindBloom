@@ -4,7 +4,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { generateSelfCareActivities } from '@/ai/flows/generate-self-care-activities';
 import { generateActivityDetails } from '@/ai/flows/generate-activity-details';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Brain, Music, Gamepad2, Feather, Shuffle, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { auth, db } from '@/lib/firebase';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 const categoryIcons: { [key: string]: LucideIcon } = {
     Breathing: Feather,
@@ -26,9 +29,11 @@ const categoryIcons: { [key: string]: LucideIcon } = {
 
 function SelfCareActivitiesContent() {
   const searchParams = useSearchParams();
-  const mood = searchParams.get('mood');
-  const stressLevel = searchParams.get('stressLevel');
-  const journalEntry = searchParams.get('journalEntry');
+  const { toast } = useToast();
+
+  const [mood, setMood] = useState<string | null>(null);
+  const [stressLevel, setStressLevel] = useState<number | null>(null);
+  const [journalEntry, setJournalEntry] = useState<string | null>(null);
 
   const [activities, setActivities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,30 +45,91 @@ function SelfCareActivitiesContent() {
   const [activityDetails, setActivityDetails] = useState('');
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
-  useEffect(() => {
-    if (mood && stressLevel) {
-      const fetchActivities = async () => {
-        try {
-          setLoading(true);
-          const result = await generateSelfCareActivities({
-            mood,
-            stressLevel: parseInt(stressLevel, 10),
-            journalEntry: journalEntry || undefined,
-          });
-          setActivities(result.activities);
-          setError(null);
-        } catch (e) {
-          setError('Could not generate activities. Please try again later.');
-          console.error(e);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchActivities();
-    } else {
-        setLoading(false);
+  // New state for loading last check-in
+  const [isLastCheckinLoading, setIsLastCheckinLoading] = useState(false);
+
+  const fetchActivities = useCallback(async (mood: string, stressLevel: number, journalEntry?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await generateSelfCareActivities({
+        mood,
+        stressLevel,
+        journalEntry: journalEntry || undefined,
+      });
+      setActivities(result.activities);
+    } catch (e) {
+      setError('Could not generate activities. Please try again later.');
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-  }, [mood, stressLevel, journalEntry]);
+  }, []);
+
+  useEffect(() => {
+    const moodParam = searchParams.get('mood');
+    const stressLevelParam = searchParams.get('stressLevel');
+    const journalEntryParam = searchParams.get('journalEntry');
+
+    if (moodParam && stressLevelParam) {
+      const stressLevelNum = parseInt(stressLevelParam, 10);
+      setMood(moodParam);
+      setStressLevel(stressLevelNum);
+      setJournalEntry(journalEntryParam);
+      fetchActivities(moodParam, stressLevelNum, journalEntryParam || undefined);
+    } else {
+      setLoading(false);
+    }
+  }, [searchParams, fetchActivities]);
+
+  const handleUseLastCheckin = async () => {
+    if (!auth.currentUser) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to use this feature.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsLastCheckinLoading(true);
+    try {
+      const q = query(
+        collection(db, "moods"),
+        where("userId", "==", auth.currentUser.uid),
+        orderBy("createdAt", "desc"),
+        limit(1)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const lastCheckin = querySnapshot.docs[0].data();
+        const lastMood = lastCheckin.mood;
+        const lastStress = lastCheckin.stressLevel;
+        const lastJournal = lastCheckin.journalEntry || undefined;
+
+        setMood(lastMood);
+        setStressLevel(lastStress);
+        setJournalEntry(lastJournal);
+
+        await fetchActivities(lastMood, lastStress, lastJournal);
+      } else {
+        toast({
+          title: "Not Found",
+          description: "No previous check-in found. Please complete one first.",
+          variant: "destructive",
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Error",
+        description: "Could not fetch your last check-in.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLastCheckinLoading(false);
+    }
+  };
+
 
   const handleCardClick = async (activity: string) => {
     const activityTitle = activity.split(':')[0];
@@ -78,7 +144,7 @@ function SelfCareActivitiesContent() {
       }
       const result = await generateActivityDetails({
         mood,
-        stressLevel: parseInt(stressLevel, 10),
+        stressLevel,
         activity: activityTitle,
         journalEntry: journalEntry || undefined,
       });
@@ -119,16 +185,22 @@ function SelfCareActivitiesContent() {
     );
   }
 
-  if (!mood || !stressLevel || activities.length === 0) {
+  if (!loading && !activities.length && !error) {
     return (
         <Card className="text-center p-8 transition-shadow hover:shadow-lg">
-            <CardTitle>No Activities Found</CardTitle>
+            <CardTitle>Get Your Suggestions</CardTitle>
             <CardDescription className="mb-6">
-                Please complete a mood check-in to get personalized activity suggestions.
+                Complete a new mood check-in or use your most recent one to get personalized activity suggestions.
             </CardDescription>
-            <Link href="/home/mood/check-in">
-              <Button>Go to Check-in</Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button onClick={handleUseLastCheckin} disabled={isLastCheckinLoading}>
+                    {isLastCheckinLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Use Last Check-in
+                </Button>
+                <Button asChild>
+                    <Link href="/home/mood/check-in">New Check-in</Link>
+                </Button>
+            </div>
         </Card>
     );
   }
