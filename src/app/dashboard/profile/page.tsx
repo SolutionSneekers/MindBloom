@@ -2,20 +2,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { auth } from '@/lib/firebase';
-import { updateProfile, onAuthStateChanged, User } from 'firebase/auth';
+import { updateProfile, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import { LogOut } from 'lucide-react';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
@@ -27,6 +29,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -89,6 +92,20 @@ export default function ProfilePage() {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!auth.currentUser) return;
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error: any) {
+       toast({
+        title: 'Error logging out',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -157,12 +174,12 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile</h1>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile & Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and profile details.</p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">User Profile</CardTitle>
+          <CardTitle className="text-xl">Edit Profile</CardTitle>
           <CardDescription>This information will be displayed publicly.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -209,6 +226,18 @@ export default function ProfilePage() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Account Actions</CardTitle>
+          <CardDescription>Manage your account session.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
+            <LogOut className="mr-2 h-4 w-4" /> Log Out
+          </Button>
         </CardContent>
       </Card>
     </div>

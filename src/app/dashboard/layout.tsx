@@ -10,10 +10,7 @@ import {
   LayoutDashboard,
   Smile,
   BookOpen,
-  History,
   Heart,
-  Wind,
-  Settings,
   LogOut,
   Menu,
   User as UserIcon,
@@ -35,11 +32,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/mood-check-in', label: 'Mood Check-In', icon: Smile },
+  { href: '/dashboard/mood', label: 'Mood', icon: Smile },
   { href: '/dashboard/journal', label: 'Journal', icon: BookOpen },
-  { href: '/dashboard/mood-history', label: 'Mood History', icon: History },
-  { href: '/dashboard/self-care-activities', label: 'Self-Care', icon: Heart },
-  { href: '/dashboard/breathing-exercise', label: 'Breathing', icon: Wind },
+  { href: '/dashboard/activities', label: 'Activities', icon: Heart },
   { href: '/dashboard/profile', label: 'Profile', icon: UserIcon },
 ];
 
@@ -73,20 +68,23 @@ export default function DashboardLayout({
 
   const NavLinks = ({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) => (
     <nav className={cn('grid items-start gap-2 text-sm font-medium', className)}>
-      {navItems.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={label}
-          href={href}
-          onClick={onLinkClick}
-          className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-            { 'bg-muted text-primary': pathname === href }
-          )}
-        >
-          <Icon className="h-4 w-4" />
-          {label}
-        </Link>
-      ))}
+      {navItems.map(({ href, label, icon: Icon }) => {
+        const isActive = href === '/dashboard' ? pathname === href : pathname.startsWith(href);
+        return (
+          <Link
+            key={label}
+            href={href}
+            onClick={onLinkClick}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+              { 'bg-muted text-primary': isActive }
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </Link>
+        )
+      })}
     </nav>
   );
 
