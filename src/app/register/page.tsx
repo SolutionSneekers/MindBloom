@@ -46,7 +46,7 @@ export default function RegisterPage() {
         title: "Account created!",
         description: "You have been successfully signed up.",
       })
-      router.push("/dashboard")
+      router.push("/home")
     } catch (error: any) {
       toast({
         title: "Uh oh! Something went wrong.",
@@ -67,7 +67,7 @@ export default function RegisterPage() {
         title: "Account created!",
         description: "You have been successfully signed up with Google.",
       })
-      router.push("/dashboard")
+      router.push("/home")
     } catch (error: any) {
       toast({
         title: "Uh oh! Something went wrong.",
