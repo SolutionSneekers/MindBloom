@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   User as UserIcon,
+  ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,6 +66,12 @@ export default function HomeLayout({
     await signOut(auth);
     router.push('/');
   };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const isTopLevelPage = navItems.some((item) => item.href === pathname);
 
   const NavLinks = ({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) => (
     <nav className={cn('grid items-start gap-2 text-base md:text-sm font-medium', className)}>
@@ -122,32 +129,39 @@ export default function HomeLayout({
       </div>
       <div className="flex flex-col">
         <header className="relative flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-               <SheetHeader>
-                 <Link
-                  href="/home"
-                  className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
-                  onClick={() => setIsMobileMenuOpen(false)}
+          {isTopLevelPage ? (
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 md:hidden"
+                  onClick={() => setIsMobileMenuOpen(true)}
                 >
-                  <Logo />
-                   <SheetTitle className="sr-only">Menu</SheetTitle>
-                </Link>
-              </SheetHeader>
-              <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
-            </SheetContent>
-          </Sheet>
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col">
+                 <SheetHeader>
+                   <Link
+                    href="/home"
+                    className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Logo />
+                     <SheetTitle className="sr-only">Menu</SheetTitle>
+                  </Link>
+                </SheetHeader>
+                <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <Button variant="outline" size="icon" className="shrink-0" onClick={handleBack}>
+              <ArrowLeft className="h-5 w-5" />
+              <span className="sr-only">Back</span>
+            </Button>
+          )}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden">
             <Link href="/home" className="flex items-center gap-2 font-semibold">
               <Logo />
