@@ -81,7 +81,7 @@ export default function BreathingExercisePage() {
       </Card>
        <div className="mt-8 text-center">
         <h1 className="text-xl font-bold sm:text-2xl font-headline">Box Breathing</h1>
-        <p className="text-muted-foreground">Inhale (4s) → Hold (4s) → Exhale (6s) → Hold (2s)</p>
+        <p className="text-muted-foreground text-xs sm:text-sm">Inhale (4s) → Hold (4s) → Exhale (6s) → Hold (2s)</p>
       </div>
     </div>
   );
