@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from "next/link"
@@ -166,11 +165,29 @@ export default function HomePage() {
     const fetchAffirmation = async () => {
       setLoadingAffirmation(true);
       try {
+        const today = new Date().toDateString();
+        const storedDataRaw = localStorage.getItem('dailyAffirmation');
+
+        if (storedDataRaw) {
+          const storedData = JSON.parse(storedDataRaw);
+          if (storedData.date === today) {
+            setAffirmation(storedData.affirmation);
+            setLoadingAffirmation(false);
+            return; // Use cached affirmation and exit
+          }
+        }
+
+        // If no valid cache, fetch a new one
         const result = await generateDailyAffirmation();
-        setAffirmation(result.affirmation);
+        const newAffirmation = result.affirmation;
+        setAffirmation(newAffirmation);
+        localStorage.setItem(
+          'dailyAffirmation',
+          JSON.stringify({ affirmation: newAffirmation, date: today })
+        );
       } catch (error) {
-        console.error("Error fetching daily affirmation:", error);
-        setAffirmation("I am resilient and can handle whatever comes my way.");
+        console.error("Error handling daily affirmation:", error);
+        setAffirmation("I am resilient and can handle whatever comes my way."); // Fallback
       } finally {
         setLoadingAffirmation(false);
       }
