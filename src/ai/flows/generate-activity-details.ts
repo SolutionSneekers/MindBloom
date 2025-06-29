@@ -20,6 +20,10 @@ const GenerateActivityDetailsInputSchema = z.object({
     .max(10)
     .describe('The stress level of the user on a scale of 1 to 10.'),
   activity: z.string().describe('The self-care activity to get details for.'),
+  journalEntry: z
+    .string()
+    .optional()
+    .describe('An optional journal entry from the user.'),
 });
 export type GenerateActivityDetailsInput = z.infer<
   typeof GenerateActivityDetailsInputSchema
@@ -45,8 +49,11 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateActivityDetailsInputSchema},
   output: {schema: GenerateActivityDetailsOutputSchema},
   prompt: `You are a warm, empathetic wellness coach. A user is feeling {{mood}} with a stress level of {{stressLevel}} out of 10. They have chosen the activity: "{{activity}}".
+  {{#if journalEntry}}
+  They also wrote about what's on their mind: "{{{journalEntry}}}"
+  {{/if}}
 
-  Provide a short, encouraging, and easy-to-understand guide for this activity. The guide should be tailored to their specific mood and stress level. Keep the explanation concise, around 2-3 paragraphs.
+  Provide a short, encouraging, and easy-to-understand guide for this activity. The guide should be tailored to their specific mood and stress level, and take their journal entry into account if provided. Keep the explanation concise, around 2-3 paragraphs.
 
   For example, if they are stressed and the activity is "Listen to calming music," you could suggest specific genres and briefly explain why it helps with stress. If they are sad and the activity is "Journaling," you could provide a couple of gentle prompts.
 

@@ -26,6 +26,7 @@ function SelfCareActivitiesContent() {
   const searchParams = useSearchParams();
   const mood = searchParams.get('mood');
   const stressLevel = searchParams.get('stressLevel');
+  const journalEntry = searchParams.get('journalEntry');
 
   const [activities, setActivities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +46,7 @@ function SelfCareActivitiesContent() {
           const result = await generateSelfCareActivities({
             mood,
             stressLevel: parseInt(stressLevel, 10),
+            journalEntry: journalEntry || undefined,
           });
           setActivities(result.activities);
           setError(null);
@@ -59,7 +61,7 @@ function SelfCareActivitiesContent() {
     } else {
         setLoading(false);
     }
-  }, [mood, stressLevel]);
+  }, [mood, stressLevel, journalEntry]);
 
   const handleCardClick = async (activity: string) => {
     const activityTitle = activity.split(':')[0];
@@ -76,6 +78,7 @@ function SelfCareActivitiesContent() {
         mood,
         stressLevel: parseInt(stressLevel, 10),
         activity: activityTitle,
+        journalEntry: journalEntry || undefined,
       });
       setActivityDetails(result.details);
     } catch (e) {

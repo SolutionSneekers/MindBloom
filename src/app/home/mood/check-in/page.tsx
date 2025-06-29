@@ -59,8 +59,9 @@ export default function MoodCheckInPage() {
         description: "Your mood has been logged.",
       });
 
+      const journalParam = journalEntry ? `&journalEntry=${encodeURIComponent(journalEntry)}` : '';
       router.push(
-        `/home/activities/self-care?mood=${selectedMood}&stressLevel=${stressLevel[0]}`
+        `/home/activities/self-care?mood=${selectedMood}&stressLevel=${stressLevel[0]}${journalParam}`
       );
     } catch (error) {
       console.error("Error adding document: ", error);
