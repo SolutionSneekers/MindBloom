@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, FormEvent, useCallback } from "react";
@@ -21,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface MoodHistoryEntry {
   id: string;
-  date: string;
+  date: string; // Stored as ISO string
   mood: string;
   stressLevel: number;
   journalEntry: string;
@@ -80,7 +81,7 @@ export default function MoodHistoryPage() {
 
           history.push({
             id: doc.id,
-            date: createdAt.toLocaleDateString(),
+            date: createdAt.toISOString(),
             mood: data.mood,
             stressLevel: data.stressLevel,
             journalEntry: data.journalEntry || '',
@@ -116,14 +117,22 @@ export default function MoodHistoryPage() {
   }, [fetchMoodHistory]);
 
   useEffect(() => {
+    if (moodHistoryData.length === 0) {
+      setChartData([]);
+      return;
+    }
     const last7Days = moodHistoryData.slice(0, 7).reverse();
     const newChartData: MoodChartData[] = last7Days.map(entry => {
          const date = new Date(entry.date);
+         if (isNaN(date.getTime())) {
+             console.error("Invalid date encountered in mood history:", entry.date);
+             return null;
+         }
          return {
             name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
             mood: moodToValue[entry.mood],
          };
-    });
+    }).filter((item): item is MoodChartData => item !== null);
     setChartData(newChartData);
   }, [moodHistoryData]);
 
@@ -242,9 +251,11 @@ export default function MoodHistoryPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => (
+                  {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => {
+                    const displayDate = new Date(entry.date).toLocaleDateString();
+                    return (
                     <TableRow key={entry.id}>
-                       <TableCell className="hidden md:table-cell font-medium">{entry.date}</TableCell>
+                       <TableCell className="hidden md:table-cell font-medium">{displayDate}</TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
                           <Badge
@@ -257,7 +268,7 @@ export default function MoodHistoryPage() {
                           >
                             {entry.mood}
                           </Badge>
-                          <span className="text-xs text-muted-foreground md:hidden">{entry.date}</span>
+                          <span className="text-xs text-muted-foreground md:hidden">{displayDate}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center">{entry.stressLevel}</TableCell>
@@ -287,7 +298,7 @@ export default function MoodHistoryPage() {
                           </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  )) : (
+                  )}) : (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
                     </TableRow>
@@ -308,7 +319,7 @@ export default function MoodHistoryPage() {
           <DialogHeader>
             <DialogTitle>Edit Mood Entry</DialogTitle>
             <DialogDescription>
-              Make changes to your mood entry from {selectedEntry?.date}. Click save when you're done.
+              Make changes to your mood entry from {selectedEntry ? new Date(selectedEntry.date).toLocaleDateString() : ''}. Click save when you're done.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdateEntry} className="grid gap-6 py-4">
@@ -374,7 +385,7 @@ export default function MoodHistoryPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your mood entry from {selectedEntry?.date}.
+              This action cannot be undone. This will permanently delete your mood entry from {selectedEntry ? new Date(selectedEntry.date).toLocaleDateString() : ''}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
