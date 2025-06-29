@@ -5,7 +5,9 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { generateSelfCareActivities } from '@/ai/flows/generate-self-care-activities';
+import { generateActivityDetails } from '@/ai/flows/generate-activity-details';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Brain, Music, Gamepad2, Feather, Shuffle } from 'lucide-react';
@@ -28,6 +30,12 @@ function SelfCareActivitiesContent() {
   const [activities, setActivities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // State for the details modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [activityDetails, setActivityDetails] = useState('');
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
 
   useEffect(() => {
     if (mood && stressLevel) {
@@ -52,6 +60,31 @@ function SelfCareActivitiesContent() {
         setLoading(false);
     }
   }, [mood, stressLevel]);
+
+  const handleCardClick = async (activity: string) => {
+    const activityTitle = activity.split(':')[0];
+    setSelectedActivity(activityTitle);
+    setIsModalOpen(true);
+    setIsDetailsLoading(true);
+    setActivityDetails('');
+
+    try {
+      if (!mood || !stressLevel) {
+        throw new Error("Mood and stress level are required to get details.");
+      }
+      const result = await generateActivityDetails({
+        mood,
+        stressLevel: parseInt(stressLevel, 10),
+        activity: activityTitle,
+      });
+      setActivityDetails(result.details);
+    } catch (e) {
+      console.error(e);
+      setActivityDetails("Sorry, we could not fetch the details for this activity. Please try again later.");
+    } finally {
+      setIsDetailsLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -103,28 +136,54 @@ function SelfCareActivitiesContent() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activities.map((activity, index) => {
-            const category = getCategoryFromActivity(activity);
-            const Icon = categoryIcons[category] || Heart;
-            return (
-                <Card key={index} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg font-headline">{activity.split(':')[0]}</CardTitle>
-                            <Badge variant="outline">{category}</Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        <div className="flex items-start gap-4">
-                            <Icon className="h-8 w-8 text-primary mt-1" />
-                            <p className="text-muted-foreground">{activity.split(': ')[1] || activity}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )
-        })}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {activities.map((activity, index) => {
+              const category = getCategoryFromActivity(activity);
+              const Icon = categoryIcons[category] || Heart;
+              return (
+                  <Card 
+                    key={index} 
+                    className="flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                    onClick={() => handleCardClick(activity)}
+                  >
+                      <CardHeader>
+                          <div className="flex items-center justify-between">
+                              <CardTitle className="text-lg font-headline">{activity.split(':')[0]}</CardTitle>
+                              <Badge variant="outline">{category}</Badge>
+                          </div>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                          <div className="flex items-start gap-4">
+                              <Icon className="h-8 w-8 text-primary mt-1" />
+                              <p className="text-muted-foreground">{activity.split(': ')[1] || activity}</p>
+                          </div>
+                      </CardContent>
+                  </Card>
+              )
+          })}
+      </div>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selectedActivity}</DialogTitle>
+            <DialogDescription>A personalized guide just for you.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 max-h-[60vh] overflow-y-auto">
+            {isDetailsLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-[90%]" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-[80%]" />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{activityDetails}</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
