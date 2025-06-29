@@ -13,7 +13,7 @@ export default function NotFound() {
            <div className="flex justify-center mb-4">
             <AlertTriangle className="h-16 w-16 text-destructive" />
           </div>
-          <CardTitle className="text-3xl font-headline">404 - Page Not Found</CardTitle>
+          <CardTitle className="text-2xl md:text-3xl font-headline">404 - Page Not Found</CardTitle>
           <CardDescription>
             Sorry, the page you are looking for could not be found.
           </CardDescription>
