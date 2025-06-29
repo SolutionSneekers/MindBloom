@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from 'next/link';
@@ -67,7 +66,7 @@ export default function DashboardLayout({
   };
 
   const NavLinks = ({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) => (
-    <nav className={cn('grid items-start gap-2 text-sm font-medium', className)}>
+    <nav className={cn('grid items-start gap-2 text-base md:text-sm font-medium', className)}>
       {navItems.map(({ href, label, icon: Icon }) => {
         const isActive = href === '/dashboard' ? pathname === href : pathname.startsWith(href);
         return (
