@@ -10,13 +10,13 @@ const moodPages = [
     {
         title: "Mood Check-In",
         description: "Log how you're feeling right now to get personalized insights.",
-        href: "/dashboard/mood-check-in",
+        href: "/dashboard/mood/check-in",
         icon: Smile,
     },
     {
         title: "Mood History",
         description: "Review your past mood entries and discover long-term trends.",
-        href: "/dashboard/mood-history",
+        href: "/dashboard/mood/history",
         icon: History,
     }
 ];

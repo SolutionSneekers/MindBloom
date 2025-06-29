@@ -10,13 +10,13 @@ const activityPages = [
     {
         title: "Self-Care Suggestions",
         description: "Get personalized, AI-powered activity suggestions based on your mood.",
-        href: "/dashboard/self-care-activities",
+        href: "/dashboard/activities/self-care",
         icon: Heart,
     },
     {
         title: "Breathing Exercise",
         description: "Center yourself with a guided box breathing session.",
-        href: "/dashboard/breathing-exercise",
+        href: "/dashboard/activities/breathing",
         icon: Wind,
     }
 ];

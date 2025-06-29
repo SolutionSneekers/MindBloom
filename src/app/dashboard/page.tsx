@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from "next/link"
@@ -31,7 +32,7 @@ const quickAccessItems = [
     title: "New Mood Check-In",
     description: "Log your current mood and feelings.",
     icon: Smile,
-    href: "/dashboard/mood-check-in",
+    href: "/dashboard/mood/check-in",
     color: "text-green-500",
   },
   {
@@ -45,7 +46,7 @@ const quickAccessItems = [
     title: "Breathing Exercise",
     description: "Find your calm and center yourself.",
     icon: Wind,
-    href: "/dashboard/breathing-exercise",
+    href: "/dashboard/activities/breathing",
     color: "text-sky-500",
   },
 ]
@@ -186,7 +187,7 @@ export default function DashboardPage() {
         </h1>
         <div className="flex items-center space-x-2">
           <Button asChild>
-            <Link href="/dashboard/mood-check-in">
+            <Link href="/dashboard/mood/check-in">
               <Smile className="mr-2 h-4 w-4" /> New Check-in
             </Link>
           </Button>
