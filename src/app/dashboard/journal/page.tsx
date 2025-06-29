@@ -317,7 +317,7 @@ export default function JournalPage() {
             </div>
           ) : pastEntries.length > 0 ? (
             pastEntries.map((entry) => (
-              <Card key={entry.id} className="p-4">
+              <Card key={entry.id} className="p-4 transition-shadow hover:shadow-md">
                  <div className="flex justify-between items-start">
                     <div>
                       <p className="font-semibold">{entry.createdAt}</p>

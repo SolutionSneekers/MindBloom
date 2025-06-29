@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from 'next/link';
@@ -6,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import {
-  LayoutDashboard,
+  Home,
   Smile,
   BookOpen,
   Heart,
@@ -30,7 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/dashboard/mood', label: 'Mood', icon: Smile },
   { href: '/dashboard/journal', label: 'Journal', icon: BookOpen },
   { href: '/dashboard/activities', label: 'Activities', icon: Heart },

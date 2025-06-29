@@ -56,7 +56,7 @@ const moodToValue: { [key: string]: number } = {
 };
 
 
-export default function DashboardPage() {
+export default function HomePage() {
   const [chartData, setChartData] = useState<MoodChartData[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [checkInCount, setCheckInCount] = useState(0);
@@ -181,10 +181,13 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
-          Welcome back{firstName && `, ${firstName}`}!
-        </h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">Home</h1>
+          <p className="text-muted-foreground">
+            Welcome back{firstName && `, ${firstName}`}!
+          </p>
+        </div>
         <div className="flex items-center space-x-2">
           <Button asChild>
             <Link href="/dashboard/mood/check-in">
@@ -194,7 +197,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Journal Streak
@@ -208,7 +211,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Mood Check-ins
@@ -222,7 +225,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Overall Mood
@@ -236,7 +239,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="bg-primary text-primary-foreground">
+        <Card className="bg-primary text-primary-foreground transition-shadow hover:shadow-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-headline">Daily Affirmation</CardTitle>
           </CardHeader>

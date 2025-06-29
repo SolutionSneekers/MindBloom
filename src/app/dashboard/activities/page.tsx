@@ -32,7 +32,7 @@ export default function ActivitiesPage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2">
                 {activityPages.map((page) => (
-                    <Card key={page.title} className="flex flex-col">
+                    <Card key={page.title} className="flex flex-col transition-shadow hover:shadow-lg">
                         <CardHeader>
                             <div className="flex items-start justify-between">
                                 <div>

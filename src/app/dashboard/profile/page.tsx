@@ -11,13 +11,14 @@ import { updateProfile, onAuthStateChanged, User, signOut } from 'firebase/auth'
 import { useToast } from '@/hooks/use-toast';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
+import { LogOut, ChevronsUpDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
@@ -33,6 +34,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
 
   const {
     register,
@@ -177,57 +179,70 @@ export default function ProfilePage() {
         <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile & Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and profile details.</p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Edit Profile</CardTitle>
-          <CardDescription>This information will be displayed publicly.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
-                  <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-                </Avatar>
-                <p className="text-sm text-muted-foreground text-center sm:text-left">
-                    Your avatar is based on the Photo URL you provide. <br />
-                    It will also sync with your Google account photo if you signed in with Google.
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" {...register('firstName')} disabled={isSaving} />
-                    {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
+      
+      <Collapsible open={isCollapsibleOpen} onOpenChange={setIsCollapsibleOpen}>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Edit Profile</CardTitle>
+                <CardDescription>Click the icon to edit your profile details.</CardDescription>
+              </div>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <ChevronsUpDown className="h-5 w-5" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </CollapsibleTrigger>
+            </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
+                      <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <p className="text-sm text-muted-foreground text-center sm:text-left">
+                        Your avatar is based on the Photo URL you provide. <br />
+                        It will also sync with your Google account photo if you signed in with Google.
+                    </p>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" {...register('lastName')} disabled={isSaving} />
-                    {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" {...register('firstName')} disabled={isSaving} />
+                        {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" {...register('lastName')} disabled={isSaving} />
+                        {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
+                    </div>
                 </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="photoURL">Photo URL</Label>
-              <Input id="photoURL" placeholder="https://example.com/image.png" {...register('photoURL')} disabled={isSaving} />
-              {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="photoURL">Photo URL</Label>
+                  <Input id="photoURL" placeholder="https://example.com/image.png" {...register('photoURL')} disabled={isSaving} />
+                  {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={user.email || ''} disabled />
-               <p className="text-sm text-muted-foreground">You cannot change your email address here.</p>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={user.email || ''} disabled />
+                   <p className="text-sm text-muted-foreground">You cannot change your email address here.</p>
+                </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       <Card>
         <CardHeader>
