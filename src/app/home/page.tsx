@@ -80,13 +80,13 @@ export default function HomePage() {
         );
         const moodSnapshot = await getDocs(moodQuery);
         
-        const history: {date: string; mood: string}[] = [];
+        const history: {date: Date; mood: string}[] = [];
         moodSnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.createdAt) {
             const createdAt = (data.createdAt as Timestamp).toDate();
             history.push({
-              date: createdAt.toLocaleDateString(),
+              date: createdAt,
               mood: data.mood,
             });
           }
@@ -94,9 +94,8 @@ export default function HomePage() {
 
         const last7Days = history.slice(0, 7).reverse();
         const formattedChartData: MoodChartData[] = last7Days.map(entry => {
-             const date = new Date(entry.date);
              return {
-                name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
+                name: entry.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
                 mood: moodToValue[entry.mood],
              };
         });

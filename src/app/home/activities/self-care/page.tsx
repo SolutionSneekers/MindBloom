@@ -2,6 +2,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { generateSelfCareActivities } from '@/ai/flows/generate-self-care-activities';
@@ -10,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Heart, Brain, Music, Gamepad2, Feather, Shuffle, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -121,9 +123,12 @@ function SelfCareActivitiesContent() {
     return (
         <Card className="text-center p-8 transition-shadow hover:shadow-lg">
             <CardTitle>No Activities Found</CardTitle>
-            <CardDescription>
+            <CardDescription className="mb-6">
                 Please complete a mood check-in to get personalized activity suggestions.
             </CardDescription>
+            <Link href="/home/mood/check-in">
+              <Button>Go to Check-in</Button>
+            </Link>
         </Card>
     );
   }
