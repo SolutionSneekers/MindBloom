@@ -46,11 +46,11 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateActivityDetailsOutputSchema},
   prompt: `You are a warm, empathetic wellness coach. A user is feeling {{mood}} with a stress level of {{stressLevel}} out of 10. They have chosen the activity: "{{activity}}".
 
-  Provide a detailed, encouraging, and step-by-step guide for this activity. Your explanation should be tailored to their specific mood and stress level.
-  
-  For example, if they are stressed and the activity is "Listen to calming music," you could suggest specific genres, explain why it helps with stress, and guide them to find a comfortable space to listen. If they are sad and the activity is "Journaling," you could provide gentle prompts to help them explore their feelings.
+  Provide a short, encouraging, and easy-to-understand guide for this activity. The guide should be tailored to their specific mood and stress level. Keep the explanation concise, around 2-3 paragraphs.
 
-  Your tone should be supportive and non-judgmental. Format the response clearly, using paragraphs for readability.
+  For example, if they are stressed and the activity is "Listen to calming music," you could suggest specific genres and briefly explain why it helps with stress. If they are sad and the activity is "Journaling," you could provide a couple of gentle prompts.
+
+  Your tone should be supportive and non-judgmental.
   `,
 });
 

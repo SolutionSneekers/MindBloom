@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Brain, Music, Gamepad2, Feather, Shuffle } from 'lucide-react';
+import { Heart, Brain, Music, Gamepad2, Feather, Shuffle, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 const categoryIcons: { [key: string]: LucideIcon } = {
@@ -171,11 +171,9 @@ function SelfCareActivitiesContent() {
           </DialogHeader>
           <div className="py-4 max-h-[60vh] overflow-y-auto">
             {isDetailsLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-[90%]" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-[80%]" />
+              <div className="flex flex-col items-center justify-center gap-4 py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-muted-foreground">Generating your personalized guide...</p>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{activityDetails}</p>
