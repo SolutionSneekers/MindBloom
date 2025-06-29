@@ -183,10 +183,9 @@ export default function HomePage() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">Home</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
             Welcome back{firstName && `, ${firstName}`}!
-          </p>
+          </h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button asChild>
