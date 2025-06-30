@@ -28,6 +28,7 @@ export default function RegisterPage() {
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -38,6 +39,13 @@ export default function RegisterPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
+    setPasswordError("");
+
+    if (password.length < 8) {
+      setPasswordError("Password must be at least 8 characters.");
+      return;
+    }
+
     setIsLoading(true)
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
@@ -142,7 +150,10 @@ export default function RegisterPage() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          if (passwordError) setPasswordError("");
+                        }}
                         required
                         disabled={isLoading}
                         className="pr-10"
@@ -158,6 +169,7 @@ export default function RegisterPage() {
                         <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                       </Button>
                     </div>
+                    {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Creating account...' : 'Create an account'}
@@ -180,5 +192,3 @@ export default function RegisterPage() {
     </div>
   )
 }
-
-    
