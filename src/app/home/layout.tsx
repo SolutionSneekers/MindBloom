@@ -25,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -96,8 +96,8 @@ export default function HomeLayout({
     return (
         <div className="flex items-center justify-center h-screen">
           <div className="flex flex-col items-center gap-4">
-            <Logo />
-            <p>Loading...</p>
+            <Logo iconClassName="h-12 w-12" textClassName="text-4xl" />
+            <p className="text-lg">Loading...</p>
           </div>
         </div>
     )
