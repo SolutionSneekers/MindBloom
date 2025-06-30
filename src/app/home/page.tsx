@@ -284,9 +284,9 @@ export default function HomePage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-24" /> : overallMood.text}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               Trend {loadingData ? <Skeleton className="h-4 w-16 inline-block" /> : overallMood.trend}
-            </p>
+            </div>
           </CardContent>
         </Card>
         <Card className="bg-primary text-primary-foreground transition-shadow hover:shadow-md">
