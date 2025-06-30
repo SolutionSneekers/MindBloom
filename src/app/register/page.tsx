@@ -65,7 +65,7 @@ export default function RegisterPage() {
     } catch (error: any) {
       toast({
         title: "Uh oh! Something went wrong.",
-        description: error.message,
+        description: "An error occurred. This email might already be in use or the password is too weak.",
         variant: "destructive",
       })
     } finally {
@@ -106,7 +106,7 @@ export default function RegisterPage() {
     } catch (error: any) {
       toast({
         title: "Uh oh! Something went wrong.",
-        description: error.message,
+        description: "An error occurred during Google sign-up. Please try again.",
         variant: "destructive",
       })
     } finally {

@@ -16,7 +16,7 @@ export function useLogout() {
     } catch (error: any) {
       toast({
         title: 'Error logging out',
-        description: error.message,
+        description: 'An error occurred while logging out. Please try again.',
         variant: 'destructive',
       });
     }

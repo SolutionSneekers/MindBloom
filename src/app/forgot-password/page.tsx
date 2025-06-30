@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from "next/link"
@@ -40,7 +39,7 @@ export default function ForgotPasswordPage() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "There was an issue sending the reset email. Please check the email address and try again.",
         variant: "destructive",
       })
     } finally {

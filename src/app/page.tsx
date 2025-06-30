@@ -38,7 +38,7 @@ export default function LoginPage() {
     } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: "The email or password you entered is incorrect. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -75,7 +75,7 @@ export default function LoginPage() {
     } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: "An error occurred during Google sign-in. Please try again.",
         variant: "destructive",
       })
     } finally {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -156,7 +155,7 @@ export default function ProfilePage() {
     } catch (error: any) {
       toast({
         title: 'Error updating profile',
-        description: error.message,
+        description: "An error occurred while updating your profile. Please try again.",
         variant: 'destructive',
       });
     } finally {
