@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   BookOpen,
   Home,
+  LogOut,
   Menu,
   Settings,
   Smile,
@@ -25,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -71,7 +72,7 @@ export default function HomeLayout({
   const isTopLevelPage = navItems.some((item) => item.href === pathname);
 
   const NavLinks = ({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) => (
-    <nav className={cn('grid items-start gap-2 text-base font-medium', className)}>
+    <nav className={cn('grid items-start gap-2 text-lg font-medium', className)}>
       {navItems.map(({ href, label, icon: Icon }) => {
         const isActive = href === '/home' ? pathname === href : pathname.startsWith(href);
         return (
@@ -198,8 +199,9 @@ export default function HomeLayout({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <Settings className="mr-2 h-4 w-4" />Logout
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
