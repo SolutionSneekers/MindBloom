@@ -82,7 +82,7 @@ export default function HomePage() {
         );
         const moodSnapshot = await getDocs(moodQuery);
         
-        const history: {date: Date; mood: string}[] = [];
+        const history: {date: Date; mood: string; stressLevel: number}[] = [];
         moodSnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.createdAt) {
@@ -90,6 +90,7 @@ export default function HomePage() {
             history.push({
               date: createdAt,
               mood: data.mood,
+              stressLevel: data.stressLevel,
             });
           }
         });
@@ -99,6 +100,9 @@ export default function HomePage() {
              return {
                 name: entry.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
                 mood: moodToValue[entry.mood],
+                stressLevel: entry.stressLevel,
+                time: entry.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+                moodName: entry.mood,
              };
         });
 
@@ -217,11 +221,9 @@ export default function HomePage() {
   return (
     <>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
-            Welcome back{firstName && `, ${firstName}`}!
-          </h1>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
+          Welcome back{firstName && `, ${firstName}`}!
+        </h1>
         <div className="flex items-center space-x-2">
           <Button asChild>
             <Link href="/home/mood/check-in">

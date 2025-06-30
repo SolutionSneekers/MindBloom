@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, FormEvent, useCallback } from "react";
@@ -131,6 +130,9 @@ export default function MoodHistoryPage() {
          return {
             name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric'}),
             mood: moodToValue[entry.mood],
+            stressLevel: entry.stressLevel,
+            time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+            moodName: entry.mood,
          };
     }).filter((item): item is MoodChartData => item !== null);
     setChartData(newChartData);

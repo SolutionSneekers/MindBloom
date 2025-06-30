@@ -20,10 +20,48 @@ const valueToMood: { [key: number]: string } = {
   6: "Happy",
 }
 
+const moodEmojis: { [key: string]: string } = {
+  'Angry': '😠',
+  'Sad': '😢',
+  'Anxious': '😟',
+  'Okay': '🙂',
+  'Calm': '😌',
+  'Happy': '😄',
+};
+
 export interface MoodChartData {
-    name: string;
-    mood: number;
+    name: string; // date e.g., 'Jul 20'
+    mood: number; // mood value for Y-axis
+    stressLevel: number;
+    time: string;
+    moodName: string;
 }
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const emoji = moodEmojis[data.moodName] || '😐';
+
+    return (
+      <div className="rounded-lg border bg-background p-3 shadow-sm text-sm">
+        <p className="font-bold mb-2">{label} at {data.time}</p>
+        <div className="space-y-1">
+          <div className="flex justify-between items-center gap-4">
+            <span className="text-muted-foreground">Mood:</span>
+            <span className="font-semibold flex items-center gap-1">{emoji} {data.moodName}</span>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <span className="text-muted-foreground">Stress Level:</span>
+            <span className="font-semibold">{data.stressLevel}/10</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 
 export default function MoodHistoryChart({ data }: { data: MoodChartData[] }) {
   if (!data || data.length === 0) {
@@ -55,13 +93,7 @@ export default function MoodHistoryChart({ data }: { data: MoodChartData[] }) {
         />
         <Tooltip
           cursor={{ fill: 'hsl(var(--accent))', opacity: 0.2 }}
-          contentStyle={{
-            background: "hsl(var(--background))",
-            borderColor: "hsl(var(--border))",
-            borderRadius: "var(--radius)",
-          }}
-          labelStyle={{ color: "hsl(var(--foreground))" }}
-          formatter={(value: number) => [valueToMood[value], "Mood"]}
+          content={<CustomTooltip />}
         />
         <Bar dataKey="mood" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
       </BarChart>
