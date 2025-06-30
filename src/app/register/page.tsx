@@ -99,7 +99,7 @@ export default function RegisterPage() {
                 <div className="grid gap-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="first-name">First Name</Label>
+                      <Label htmlFor="first-name">First Name <span className="text-destructive">*</span></Label>
                       <Input
                         id="first-name"
                         placeholder="Max"
@@ -110,7 +110,7 @@ export default function RegisterPage() {
                       />
                     </div>
                      <div className="grid gap-2">
-                      <Label htmlFor="last-name">Last Name</Label>
+                      <Label htmlFor="last-name">Last Name <span className="text-destructive">*</span></Label>
                       <Input
                         id="last-name"
                         placeholder="Robinson"
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
                     <Input
                       id="email"
                       type="email"
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
                     <Input
                       id="password"
                       type="password"

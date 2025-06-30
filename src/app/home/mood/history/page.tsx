@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, FormEvent, useCallback } from "react";
@@ -313,7 +314,7 @@ export default function MoodHistoryPage() {
           </DialogHeader>
           <form onSubmit={handleUpdateEntry} className="grid gap-6 py-4">
               <div className="space-y-2">
-                <Label className="text-base font-medium">1. Select your mood</Label>
+                <Label className="text-base font-medium">1. Select your mood <span className="text-destructive">*</span></Label>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                   {moods.map((mood) => (
                     <div key={mood.name} className="flex flex-col items-center gap-2">

@@ -76,7 +76,7 @@ export default function MoodCheckInPage() {
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="space-y-4">
-            <Label className="text-base font-medium">1. Select your mood</Label>
+            <Label className="text-base font-medium">1. Select your mood <span className="text-destructive">*</span></Label>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
               {moods.map((mood) => (
                 <div key={mood.name} className="flex flex-col items-center gap-2">

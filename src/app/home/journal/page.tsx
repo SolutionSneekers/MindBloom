@@ -298,13 +298,17 @@ export default function JournalPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Textarea
-            placeholder="Start writing here..."
-            className="min-h-[200px] text-base"
-            value={journalEntry}
-            onChange={(e) => setJournalEntry(e.target.value)}
-            disabled={isSaving}
-          />
+          <div className="grid gap-2">
+            <Label htmlFor="new-journal-entry">Your thoughts <span className="text-destructive">*</span></Label>
+            <Textarea
+              id="new-journal-entry"
+              placeholder="Start writing here..."
+              className="min-h-[200px] text-base"
+              value={journalEntry}
+              onChange={(e) => setJournalEntry(e.target.value)}
+              disabled={isSaving}
+            />
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
            <Button onClick={saveToFirestore} disabled={!journalEntry || isSaving}>
@@ -382,7 +386,7 @@ export default function JournalPage() {
           </DialogHeader>
           <form onSubmit={handleUpdateEntry} className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-journal-entry" className="text-base font-medium">Your entry</Label>
+                <Label htmlFor="edit-journal-entry" className="text-base font-medium">Your entry <span className="text-destructive">*</span></Label>
                 <Textarea
                   id="edit-journal-entry"
                   value={editEntryText}

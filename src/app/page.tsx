@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from "next/link"
@@ -83,7 +84,7 @@ export default function LoginPage() {
               <form onSubmit={handleLogin}>
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
                     <Input
                       id="email"
                       type="email"
@@ -96,7 +97,7 @@ export default function LoginPage() {
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
                       <Link
                         href="/forgot-password"
                         className="ml-auto inline-block text-sm underline"
