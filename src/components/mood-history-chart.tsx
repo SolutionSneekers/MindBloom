@@ -1,33 +1,7 @@
 'use client'
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-
-const moodToValue: { [key: string]: number } = {
-  Angry: 1,
-  Sad: 2,
-  Anxious: 3,
-  Okay: 4,
-  Calm: 5,
-  Happy: 6,
-}
-
-const valueToMood: { [key: number]: string } = {
-  1: "Angry",
-  2: "Sad",
-  3: "Anxious",
-  4: "Okay",
-  5: "Calm",
-  6: "Happy",
-}
-
-const moodEmojis: { [key: string]: string } = {
-  'Angry': '😠',
-  'Sad': '😢',
-  'Anxious': '😟',
-  'Okay': '🙂',
-  'Calm': '😌',
-  'Happy': '😄',
-};
+import { valueToMood, moodEmojis } from "@/lib/utils";
 
 export interface MoodChartData {
     name: string; // date e.g., 'Jul 20'

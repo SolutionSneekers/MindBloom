@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/card"
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart"
 import { Skeleton } from "@/components/ui/skeleton"
+import { moodToValue, valueToMood } from "@/lib/utils"
 
 const quickAccessItems = [
   {
@@ -51,11 +52,6 @@ const quickAccessItems = [
   },
 ]
 
-const moodToValue: { [key: string]: number } = {
-  Angry: 1, Sad: 2, Anxious: 3, Okay: 4, Calm: 5, Happy: 6,
-};
-
-
 export default function HomePage() {
   const [chartData, setChartData] = useState<MoodChartData[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -64,6 +60,7 @@ export default function HomePage() {
   const [firstName, setFirstName] = useState('');
   const [affirmation, setAffirmation] = useState('');
   const [loadingAffirmation, setLoadingAffirmation] = useState(true);
+  const [overallMood, setOverallMood] = useState({ text: 'No data', trend: 'N/A' });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -108,6 +105,23 @@ export default function HomePage() {
 
         setChartData(formattedChartData);
         setCheckInCount(moodSnapshot.size);
+        
+        if (formattedChartData.length > 0) {
+          const totalMood = formattedChartData.reduce((acc, curr) => acc + curr.mood, 0);
+          const avgMoodValue = Math.round(totalMood / formattedChartData.length);
+          const avgMoodText = valueToMood[avgMoodValue] || 'Neutral';
+
+          let trendText = 'is steady';
+          if (formattedChartData.length > 1) {
+            const firstMood = formattedChartData[0].mood;
+            const lastMood = formattedChartData[formattedChartData.length - 1].mood;
+            if (lastMood > firstMood) trendText = 'is improving';
+            if (lastMood < firstMood) trendText = 'is declining';
+          }
+          setOverallMood({ text: avgMoodText, trend: trendText });
+        } else {
+          setOverallMood({ text: 'No data', trend: 'N/A' });
+        }
 
         // Fetch journal data for streak
         const journalQuery = query(
@@ -269,9 +283,9 @@ export default function HomePage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Positive</div>
+            <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-24" /> : overallMood.text}</div>
             <p className="text-xs text-muted-foreground">
-              Trend is improving
+              Trend {loadingData ? <Skeleton className="h-4 w-16 inline-block" /> : overallMood.trend}
             </p>
           </CardContent>
         </Card>

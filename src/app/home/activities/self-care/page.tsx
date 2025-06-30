@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { generateSelfCareActivities } from '@/ai/flows/generate-self-care-activities';
+import { generateSelfCareActivities, type GenerateSelfCareActivitiesOutput } from '@/ai/flows/generate-self-care-activities';
 import { generateActivityDetails } from '@/ai/flows/generate-activity-details';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -17,6 +17,8 @@ import type { LucideIcon } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+
+type Activity = GenerateSelfCareActivitiesOutput['activities'][0];
 
 const categoryIcons: { [key: string]: LucideIcon } = {
     Breathing: Feather,
@@ -35,7 +37,7 @@ function SelfCareActivitiesContent() {
   const [stressLevel, setStressLevel] = useState<number | null>(null);
   const [journalEntry, setJournalEntry] = useState<string | null>(null);
 
-  const [activities, setActivities] = useState<string[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -131,9 +133,8 @@ function SelfCareActivitiesContent() {
   };
 
 
-  const handleCardClick = async (activity: string) => {
-    const activityTitle = activity.split(':')[0];
-    setSelectedActivity(activityTitle);
+  const handleCardClick = async (activity: Activity) => {
+    setSelectedActivity(activity.title);
     setIsModalOpen(true);
     setIsDetailsLoading(true);
     setActivityDetails('');
@@ -145,7 +146,7 @@ function SelfCareActivitiesContent() {
       const result = await generateActivityDetails({
         mood,
         stressLevel,
-        activity: activityTitle,
+        activity: activity.title,
         journalEntry: journalEntry || undefined,
       });
       setActivityDetails(result.details);
@@ -205,22 +206,11 @@ function SelfCareActivitiesContent() {
     );
   }
 
-  const getCategoryFromActivity = (activity: string): string => {
-    const lowerCaseActivity = activity.toLowerCase();
-    if (lowerCaseActivity.includes('breath') || lowerCaseActivity.includes('meditat')) return 'Breathing';
-    if (lowerCaseActivity.includes('journal') || lowerCaseActivity.includes('write')) return 'Journaling';
-    if (lowerCaseActivity.includes('walk') || lowerCaseActivity.includes('stretch') || lowerCaseActivity.includes('dance')) return 'Movement';
-    if (lowerCaseActivity.includes('music') || lowerCaseActivity.includes('song')) return 'Music';
-    if (lowerCaseActivity.includes('game') || lowerCaseActivity.includes('puzzle')) return 'Games';
-    return 'Surprise Me';
-  }
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activities.map((activity, index) => {
-              const category = getCategoryFromActivity(activity);
-              const Icon = categoryIcons[category] || Heart;
+              const Icon = categoryIcons[activity.category] || Heart;
               return (
                   <Card 
                     key={index} 
@@ -229,14 +219,14 @@ function SelfCareActivitiesContent() {
                   >
                       <CardHeader>
                           <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg font-headline">{activity.split(':')[0]}</CardTitle>
-                              <Badge variant="outline">{category}</Badge>
+                              <CardTitle className="text-lg font-headline">{activity.title}</CardTitle>
+                              <Badge variant="outline">{activity.category}</Badge>
                           </div>
                       </CardHeader>
                       <CardContent className="flex-grow">
                           <div className="flex items-start gap-4">
                               <Icon className="h-8 w-8 text-primary mt-1" />
-                              <p className="text-muted-foreground">{activity.split(': ')[1] || activity}</p>
+                              <p className="text-muted-foreground">{activity.description}</p>
                           </div>
                       </CardContent>
                   </Card>

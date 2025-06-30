@@ -13,15 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-
-const moods = [
-  { name: 'Happy', emoji: '😄' },
-  { name: 'Calm', emoji: '😌' },
-  { name: 'Okay', emoji: '🙂' },
-  { name: 'Sad', emoji: '😢' },
-  { name: 'Anxious', emoji: '😟' },
-  { name: 'Angry', emoji: '😠' },
-];
+import { moods } from '@/lib/utils';
 
 export default function MoodCheckInPage() {
   const router = useRouter();

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, moodToValue, moods } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
@@ -26,19 +26,6 @@ interface MoodHistoryEntry {
   stressLevel: number;
   journalEntry: string;
 }
-
-const moodToValue: { [key: string]: number } = {
-  Angry: 1, Sad: 2, Anxious: 3, Okay: 4, Calm: 5, Happy: 6,
-};
-
-const moods = [
-  { name: 'Happy', emoji: '😄' },
-  { name: 'Calm', emoji: '😌' },
-  { name: 'Okay', emoji: '🙂' },
-  { name: 'Sad', emoji: '😢' },
-  { name: 'Anxious', emoji: '😟' },
-  { name: 'Angry', emoji: '😠' },
-];
 
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);

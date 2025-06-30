@@ -30,8 +30,20 @@ export type GenerateSelfCareActivitiesInput = z.infer<
 
 const GenerateSelfCareActivitiesOutputSchema = z.object({
   activities: z
-    .array(z.string())
-    .describe('An array of self-care activity suggestions.'),
+    .array(
+      z.object({
+        title: z.string().describe('The title of the activity.'),
+        category: z
+          .string()
+          .describe(
+            'The category of the activity. Must be one of: Breathing, Journaling, Movement, Music, Games, Surprise Me.'
+          ),
+        description: z
+          .string()
+          .describe('A short, one-sentence description of the activity.'),
+      })
+    )
+    .describe('An array of self-care activity objects.'),
 });
 export type GenerateSelfCareActivitiesOutput = z.infer<
   typeof GenerateSelfCareActivitiesOutputSchema
@@ -55,7 +67,11 @@ const prompt = ai.definePrompt({
   User's thoughts: {{{journalEntry}}}
   {{/if}}
 
-  Suggest a list of self-care activities that are appropriate for the user's current state. If the user provided their thoughts, use that as the primary context for your suggestions. Consider activities from categories like breathing, journaling, movement, music, games and the option for a 'Surprise Me' selection. Return ONLY an array of strings, and nothing else. No intro, explanation, or conclusion.
+  Suggest a list of 5-6 self-care activities that are appropriate for the user's current state. If the user provided their thoughts, use that as the primary context for your suggestions.
+
+  For each activity, provide a title, a short one-sentence description, and a category. The category MUST be one of the following: Breathing, Journaling, Movement, Music, Games, Surprise Me.
+  
+  Return ONLY a JSON object with an "activities" key containing an array of these activity objects, and nothing else. No intro, explanation, or conclusion.
   `,
 });
 
