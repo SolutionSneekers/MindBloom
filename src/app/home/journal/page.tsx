@@ -290,7 +290,7 @@ export default function JournalPage() {
           />
         </CardContent>
         <CardFooter className="flex justify-end">
-           <Button variant="outline" onClick={saveToFirestore} disabled={!journalEntry || isSaving}>
+           <Button onClick={saveToFirestore} disabled={!journalEntry || isSaving}>
             <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save Entry'}
           </Button>
         </CardFooter>
