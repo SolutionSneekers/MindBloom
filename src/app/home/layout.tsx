@@ -75,7 +75,7 @@ export default function HomeLayout({
   const isTopLevelPage = navItems.some((item) => item.href === pathname);
 
   const NavLinks = ({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) => (
-    <nav className={cn('grid items-start gap-2 text-base md:text-sm font-medium', className)}>
+    <nav className={cn('grid items-start gap-2 text-base font-medium', className)}>
       {navItems.map(({ href, label, icon: Icon }) => {
         const isActive = href === '/home' ? pathname === href : pathname.startsWith(href);
         return (
