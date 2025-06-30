@@ -271,6 +271,7 @@ export default function ProfilePage() {
                             toYear={new Date().getFullYear()}
                             selected={field.value}
                             onSelect={field.onChange}
+                            defaultMonth={field.value}
                             disabled={(date) =>
                               date > new Date() || date < new Date("1900-01-01")
                             }
