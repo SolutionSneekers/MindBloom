@@ -137,9 +137,14 @@ export default function ProfilePage() {
         photoURL: data.photoURL,
       });
 
-      // Save additional data to Firestore
+      // Save/update user data in Firestore
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      await setDoc(userDocRef, { dob: data.dob ? Timestamp.fromDate(data.dob) : null }, { merge: true });
+      await setDoc(userDocRef, { 
+        firstName: data.firstName,
+        lastName: data.lastName,
+        photoURL: data.photoURL,
+        dob: data.dob ? Timestamp.fromDate(data.dob) : null 
+      }, { merge: true });
 
 
       setUser(auth.currentUser);
@@ -420,7 +425,7 @@ export default function ProfilePage() {
                     <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
                       {showOldPassword ? <Eye /> : <EyeOff />}
-                      <span className="sr-only">{showOldPassword ? 'Show password' : 'Hide password'}</span>
+                      <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
@@ -432,7 +437,7 @@ export default function ProfilePage() {
                     <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
                       {showNewPassword ? <Eye /> : <EyeOff />}
-                       <span className="sr-only">{showNewPassword ? 'Show password' : 'Hide password'}</span>
+                       <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
@@ -444,7 +449,7 @@ export default function ProfilePage() {
                     <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
                       {showConfirmPassword ? <Eye /> : <EyeOff />}
-                       <span className="sr-only">{showConfirmPassword ? 'Show password' : 'Hide password'}</span>
+                       <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}

@@ -5,9 +5,10 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { auth, db } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Eye, EyeOff } from "lucide-react"
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -44,9 +45,19 @@ export default function RegisterPage() {
     setIsLoading(true)
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      await updateProfile(userCredential.user, {
+      const user = userCredential.user;
+      await updateProfile(user, {
         displayName: `${firstName} ${lastName}`.trim()
       })
+      // Store user details in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        firstName,
+        lastName,
+        email: user.email,
+        createdAt: serverTimestamp(),
+      });
+
       toast({
         title: "Account created!",
         description: "You have been successfully signed up.",
@@ -67,7 +78,27 @@ export default function RegisterPage() {
     setIsLoading(true)
     try {
       const provider = new GoogleAuthProvider()
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user;
+
+      // Check if user exists in Firestore, if not, create a document
+      const userDocRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userDocRef);
+
+      if (!docSnap.exists()) {
+        const nameParts = user.displayName?.split(' ') || ['', ''];
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          firstName,
+          lastName,
+          email: user.email,
+          photoURL: user.photoURL,
+          createdAt: serverTimestamp()
+        });
+      }
+
       toast({
         title: "Account created!",
         description: "You have been successfully signed up with Google.",
@@ -158,8 +189,8 @@ export default function RegisterPage() {
                     className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent"
                     onClick={() => setShowPassword((prev) => !prev)}
                   >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                    <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                    {showPassword ? <Eye /> : <EyeOff />}
+                    <span className="sr-only">{showPassword ? 'Show password' : 'Hide password'}</span>
                   </Button>
                 </div>
                 {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
