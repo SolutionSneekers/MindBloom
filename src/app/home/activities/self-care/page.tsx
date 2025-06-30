@@ -59,8 +59,9 @@ function SelfCareActivitiesContent() {
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
         if (userData.dob && userData.dob instanceof Timestamp) {
-          setAge(calculateAge(userData.dob.toDate()));
-          return calculateAge(userData.dob.toDate());
+          const userAge = calculateAge(userData.dob.toDate());
+          setAge(userAge);
+          return userAge;
         }
       }
     }
@@ -103,7 +104,7 @@ function SelfCareActivitiesContent() {
     }
   }, [searchParams, fetchActivities]);
 
-  const handleUseLastCheckin = async () => {
+  const handleUseLastCheckin = useCallback(async () => {
     if (!auth.currentUser) {
       toast({
         title: "Please log in",
@@ -149,10 +150,10 @@ function SelfCareActivitiesContent() {
     } finally {
       setIsLastCheckinLoading(false);
     }
-  };
+  }, [toast, fetchActivities]);
 
 
-  const handleCardClick = async (activity: Activity) => {
+  const handleCardClick = useCallback(async (activity: Activity) => {
     setSelectedActivity(activity.title);
     setIsModalOpen(true);
     setIsDetailsLoading(true);
@@ -177,7 +178,7 @@ function SelfCareActivitiesContent() {
     } finally {
       setIsDetailsLoading(false);
     }
-  };
+  }, [mood, stressLevel, journalEntry, fetchUserAge]);
 
   if (loading) {
     return (
@@ -286,7 +287,7 @@ export default function SelfCareActivitiesPage() {
                     Here are some AI-powered activities tailored to how you&apos;re feeling.
                 </p>
             </div>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div className="text-center p-8">Loading your suggestions...</div>}>
                 <SelfCareActivitiesContent />
             </Suspense>
         </div>

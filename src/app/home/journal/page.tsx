@@ -125,7 +125,7 @@ export default function JournalPage() {
     return () => unsubscribe();
   }, [fetchJournalEntries, fetchUserAge]);
 
-  const handleGetPrompt = async (mood: string) => {
+  const handleGetPrompt = useCallback(async (mood: string) => {
     setSelectedMood(mood);
     if (!mood) return;
 
@@ -145,9 +145,9 @@ export default function JournalPage() {
     } finally {
       setIsLoadingPrompt(false);
     }
-  };
+  }, [age, toast]);
   
-  const saveToFirestore = async () => {
+  const saveToFirestore = useCallback(async () => {
     if (!journalEntry || !auth.currentUser) {
       toast({
         title: "Error",
@@ -172,6 +172,7 @@ export default function JournalPage() {
       setJournalEntry('');
       setSelectedMood('');
       setPrompt('Select a mood to get a journaling prompt.');
+      fetchJournalEntries(); // Refresh list
     } catch (error) {
       console.error("Error saving entry: ", error);
       toast({
@@ -181,9 +182,8 @@ export default function JournalPage() {
       });
     } finally {
       setIsSaving(false);
-      fetchJournalEntries(); // Refresh list
     }
-  };
+  }, [journalEntry, selectedMood, prompt, toast, fetchJournalEntries]);
 
   const handleOpenEditDialog = (entry: JournalEntry) => {
     setSelectedEntry(entry);
@@ -196,7 +196,7 @@ export default function JournalPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleUpdateEntry = async (e: FormEvent) => {
+  const handleUpdateEntry = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedEntry || !auth.currentUser || !editEntryText) return;
     setIsUpdating(true);
@@ -222,9 +222,9 @@ export default function JournalPage() {
       setIsEditDialogOpen(false);
       setSelectedEntry(null);
     }
-  };
+  }, [selectedEntry, editEntryText, toast, fetchJournalEntries]);
 
-  const handleDeleteEntry = async () => {
+  const handleDeleteEntry = useCallback(async () => {
     if (!selectedEntry || !auth.currentUser) return;
     setIsDeleting(true);
     try {
@@ -246,7 +246,7 @@ export default function JournalPage() {
       setIsDeleteDialogOpen(false);
       setSelectedEntry(null);
     }
-  };
+  }, [selectedEntry, toast, fetchJournalEntries]);
 
   return (
     <div className="space-y-6">

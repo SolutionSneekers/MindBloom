@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, FormEvent, useCallback } from "react";
+import { useState, useEffect, FormEvent, useCallback, useMemo } from "react";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, where, orderBy, limit, getDocs, Timestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart";
@@ -30,7 +30,6 @@ interface MoodHistoryEntry {
 
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);
-  const [chartData, setChartData] = useState<MoodChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -96,17 +95,15 @@ export default function MoodHistoryPage() {
         } else {
             setLoading(false);
             setMoodHistoryData([]);
-            setChartData([]);
         }
     });
 
     return () => unsubscribe();
   }, [fetchMoodHistory]);
 
-  useEffect(() => {
+  const chartData = useMemo(() => {
     if (moodHistoryData.length === 0) {
-      setChartData([]);
-      return;
+      return [];
     }
     const last7Days = moodHistoryData.slice(0, 7).reverse();
     const newChartData: MoodChartData[] = last7Days.map(entry => {
@@ -123,7 +120,7 @@ export default function MoodHistoryPage() {
             moodName: entry.mood,
          };
     }).filter((item): item is MoodChartData => item !== null);
-    setChartData(newChartData);
+    return newChartData;
   }, [moodHistoryData]);
 
   const handleOpenEditDialog = (entry: MoodHistoryEntry) => {
@@ -139,7 +136,7 @@ export default function MoodHistoryPage() {
     setIsDeleteDialogOpen(true);
   }
 
-  const handleDeleteEntry = async () => {
+  const handleDeleteEntry = useCallback(async () => {
     if (!selectedEntry || !auth.currentUser) return;
     setIsDeleting(true);
     try {
@@ -161,9 +158,9 @@ export default function MoodHistoryPage() {
       setIsDeleteDialogOpen(false);
       setSelectedEntry(null);
     }
-  };
+  }, [selectedEntry, fetchMoodHistory, toast]);
 
-  const handleUpdateEntry = async (e: FormEvent) => {
+  const handleUpdateEntry = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedEntry || !auth.currentUser) return;
     setIsUpdating(true);
@@ -191,7 +188,7 @@ export default function MoodHistoryPage() {
       setIsEditDialogOpen(false);
       setSelectedEntry(null);
     }
-  };
+  }, [selectedEntry, editMood, editStressLevel, editJournalEntry, fetchMoodHistory, toast]);
 
   return (
     <div className="space-y-6">

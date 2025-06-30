@@ -2,7 +2,7 @@
 'use client'
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { sendPasswordResetEmail } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
@@ -24,11 +24,6 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSent, setIsSent] = useState(false)
-  const [hasMounted, setHasMounted] = useState(false)
-
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,37 +61,33 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {hasMounted && (
-            <>
-              {!isSent ? (
-                <form onSubmit={handleReset}>
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="m@example.com"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? 'Sending...' : 'Send Reset Link'}
-                    </Button>
-                  </div>
-                </form>
-              ) : null}
-              <div className="mt-4 text-center text-sm">
-                Remember your password?{" "}
-                <Link href="/" className="underline">
-                  Sign in
-                </Link>
+          {!isSent ? (
+            <form onSubmit={handleReset}>
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Sending...' : 'Send Reset Link'}
+                </Button>
               </div>
-            </>
-          )}
+            </form>
+          ) : null}
+          <div className="mt-4 text-center text-sm">
+            Remember your password?{" "}
+            <Link href="/" className="underline">
+              Sign in
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
