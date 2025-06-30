@@ -3,19 +3,18 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import React, { useCallback, useEffect, useState } from 'react';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import {
-  Home,
-  Smile,
-  BookOpen,
   Activity,
-  LogOut,
-  Menu,
-  User as UserIcon,
   ArrowLeft,
+  BookOpen,
+  Home,
+  Menu,
   Settings,
+  Smile,
+  User as UserIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLogout } from '@/hooks/use-logout';
 
 const navItems = [
   { href: '/home', label: 'Home', icon: Home },
@@ -50,6 +50,7 @@ export default function HomeLayout({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { handleLogout } = useLogout();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -61,11 +62,6 @@ export default function HomeLayout({
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [router]);
-
-  const handleLogout = useCallback(async () => {
-    await signOut(auth);
-    router.push('/');
   }, [router]);
 
   const handleBack = useCallback(() => {
@@ -190,13 +186,15 @@ export default function HomeLayout({
                   Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-                </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/home/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />Logout
+                <Settings className="mr-2 h-4 w-4" />Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
