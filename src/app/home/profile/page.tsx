@@ -290,7 +290,7 @@ export default function ProfilePage() {
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <Avatar className="h-20 w-20">
+                    <Avatar className="h-20 w-20 border">
                       <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
                       <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                     </Avatar>

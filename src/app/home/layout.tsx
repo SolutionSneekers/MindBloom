@@ -173,7 +173,7 @@ export default function HomeLayout({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
-                <Avatar>
+                <Avatar className="border">
                   <AvatarImage src={user.photoURL || "https://placehold.co/40x40.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
