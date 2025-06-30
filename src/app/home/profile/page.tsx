@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, CalendarIcon, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { LogOut, ChevronsUpDown, CalendarIcon, Eye, EyeOff, KeyRound, User as UserIcon, Settings } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -280,7 +280,7 @@ export default function ProfilePage() {
             <CollapsibleTrigger className="w-full text-left">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-xl font-headline">Edit Profile</CardTitle>
+                  <CardTitle className="text-xl font-headline flex items-center gap-2"><UserIcon /> Edit Profile</CardTitle>
                   <CardDescription>Click to expand and edit your profile details.</CardDescription>
                 </div>
                   <ChevronsUpDown className={cn("h-5 w-5 transition-transform duration-300", isCollapsibleOpen && "rotate-180")} />
@@ -395,7 +395,12 @@ export default function ProfilePage() {
         </Card>
       </Collapsible>
       
-      <Collapsible open={isPasswordCollapsibleOpen} onOpenChange={setIsPasswordCollapsibleOpen}>
+      <Collapsible open={isPasswordCollapsibleOpen} onOpenChange={(isOpen) => {
+        setIsPasswordCollapsibleOpen(isOpen);
+        if (!isOpen) {
+          resetPasswordForm();
+        }
+      }}>
         <Card className="transition-shadow hover:shadow-md">
            <CollapsibleTrigger className="w-full text-left">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -459,7 +464,7 @@ export default function ProfilePage() {
 
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl">Account Actions</CardTitle>
+          <CardTitle className="text-xl font-headline flex items-center gap-2"><Settings /> Account Actions</CardTitle>
           <CardDescription>Manage your account session.</CardDescription>
         </CardHeader>
         <CardContent>
