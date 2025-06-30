@@ -52,6 +52,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(true);
+  const [isPasswordCollapsibleOpen, setIsPasswordCollapsibleOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -391,57 +392,66 @@ export default function ProfilePage() {
         </Card>
       </Collapsible>
       
-      <Card className="transition-shadow hover:shadow-md">
-        <CardHeader>
-          <CardTitle className="text-xl font-headline flex items-center gap-2"><KeyRound /> Change Password</CardTitle>
-          <CardDescription>Update your password here. It's recommended to use a strong, unique password.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="oldPassword">Old Password <span className="text-destructive">*</span></Label>
-              <div className="relative">
-                <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" />
-                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
-                  {showOldPassword ? <EyeOff /> : <Eye />}
-                  <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
-                </Button>
-              </div>
-              {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
-            </div>
+      <Collapsible open={isPasswordCollapsibleOpen} onOpenChange={setIsPasswordCollapsibleOpen}>
+        <Card className="transition-shadow hover:shadow-md">
+           <CollapsibleTrigger className="w-full text-left">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle className="text-xl font-headline flex items-center gap-2"><KeyRound /> Change Password</CardTitle>
+                    <CardDescription>Update your password here. Click to expand.</CardDescription>
+                </div>
+                 <ChevronsUpDown className={cn("h-5 w-5 transition-transform duration-300", isPasswordCollapsibleOpen && "rotate-180")} />
+              </CardHeader>
+            </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-6">
+              <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="oldPassword">Old Password <span className="text-destructive">*</span></Label>
+                  <div className="relative">
+                    <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="current-password" />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
+                      {showOldPassword ? <EyeOff /> : <Eye />}
+                      <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
+                    </Button>
+                  </div>
+                  {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password <span className="text-destructive">*</span></Label>
-               <div className="relative">
-                <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" />
-                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
-                  {showNewPassword ? <EyeOff /> : <Eye />}
-                   <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
-                </Button>
-              </div>
-              {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password <span className="text-destructive">*</span></Label>
+                   <div className="relative">
+                    <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
+                      {showNewPassword ? <EyeOff /> : <Eye />}
+                       <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
+                    </Button>
+                  </div>
+                  {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password <span className="text-destructive">*</span></Label>
-               <div className="relative">
-                <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" />
-                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
-                  {showConfirmPassword ? <EyeOff /> : <Eye />}
-                   <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
-                </Button>
-              </div>
-              {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password <span className="text-destructive">*</span></Label>
+                   <div className="relative">
+                    <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
+                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                       <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
+                    </Button>
+                  </div>
+                  {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}
+                </div>
 
-            <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={isSavingPassword}>
-                {isSavingPassword ? 'Updating...' : 'Update Password'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                <div className="flex justify-end pt-2">
+                  <Button type="submit" disabled={isSavingPassword}>
+                    {isSavingPassword ? 'Updating...' : 'Update Password'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
 
       <Card className="transition-shadow hover:shadow-md">
@@ -458,5 +468,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
