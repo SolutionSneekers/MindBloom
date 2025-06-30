@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from "next/link"
@@ -123,8 +124,8 @@ export default function LoginPage() {
                         className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeOff /> : <Eye />}
-                        <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                        {showPassword ? <Eye /> : <EyeOff />}
+                        <span className="sr-only">{showPassword ? 'Show password' : 'Hide password'}</span>
                       </Button>
                     </div>
                   </div>
