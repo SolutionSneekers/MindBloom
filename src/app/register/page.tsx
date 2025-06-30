@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from "next/link"
@@ -20,7 +19,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Logo } from "@/components/icons"
+import { Logo, GoogleIcon } from "@/components/icons"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -194,7 +193,7 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword((prev) => !prev)}
                   >
                     {showPassword ? <Eye /> : <EyeOff />}
-                    <span className="sr-only">{showPassword ? 'Show password' : 'Hide password'}</span>
+                    <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                   </Button>
                 </div>
                 {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
@@ -205,7 +204,7 @@ export default function RegisterPage() {
             </div>
           </form>
           <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignUp} disabled={isLoading}>
-            Sign up with Google
+            <GoogleIcon /> Sign up with Google
           </Button>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}

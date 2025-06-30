@@ -1,13 +1,13 @@
-
 'use client'
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { auth, db } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Eye, EyeOff } from "lucide-react"
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Logo } from "@/components/icons"
+import { Logo, GoogleIcon } from "@/components/icons"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -50,7 +50,27 @@ export default function LoginPage() {
     setIsLoading(true)
     try {
       const provider = new GoogleAuthProvider()
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user;
+
+      // Check if user exists in Firestore, if not, create a document
+      const userDocRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userDocRef);
+
+      if (!docSnap.exists()) {
+        const nameParts = user.displayName?.split(' ') || ['', ''];
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          firstName,
+          lastName,
+          email: user.email,
+          photoURL: user.photoURL,
+          createdAt: serverTimestamp()
+        });
+      }
+
       router.push("/home")
     } catch (error: any) {
       toast({
@@ -130,7 +150,7 @@ export default function LoginPage() {
             </div>
           </form>
           <Button variant="outline" className="w-full mt-4" onClick={handleGoogleLogin} disabled={isLoading}>
-            Login with Google
+            <GoogleIcon /> Login with Google
           </Button>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
