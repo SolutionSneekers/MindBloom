@@ -2,15 +2,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { auth, db } from '@/lib/firebase';
-import { updateProfile, onAuthStateChanged, User, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
+import { updateProfile, onAuthStateChanged, User, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useLogout } from '@/hooks/use-logout';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, CalendarIcon, EyeOff, Eye, KeyRound, User as UserIcon, Settings } from 'lucide-react';
+import { LogOut, ChevronsUpDown, CalendarIcon, Eye, EyeOff, KeyRound, User as UserIcon, Settings } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -47,7 +47,6 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
   const { toast } = useToast();
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -58,6 +57,7 @@ export default function ProfilePage() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { handleLogout } = useLogout();
 
   const {
     register,
@@ -143,8 +143,8 @@ export default function ProfilePage() {
       await setDoc(userDocRef, { 
         firstName: data.firstName,
         lastName: data.lastName,
-        dob: data.dob ? Timestamp.fromDate(data.dob) : null,
         photoURL: data.photoURL,
+        dob: data.dob ? Timestamp.fromDate(data.dob) : null,
       }, { merge: true });
 
 
@@ -197,20 +197,6 @@ export default function ProfilePage() {
     }
   };
 
-
-  const handleLogout = async () => {
-    if (!auth.currentUser) return;
-    try {
-      await signOut(auth);
-      router.push('/');
-    } catch (error: any) {
-       toast({
-        title: 'Error logging out',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
 
   if (isLoading) {
     return (
@@ -425,8 +411,8 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="current-password" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
-                      {showOldPassword ? <Eye /> : <EyeOff />}
-                      <span className="sr-only">{showOldPassword ? 'Show password' : 'Hide password'}</span>
+                      {showOldPassword ? <EyeOff /> : <Eye />}
+                      <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
@@ -437,8 +423,8 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
-                      {showNewPassword ? <Eye /> : <EyeOff />}
-                       <span className="sr-only">{showNewPassword ? 'Show password' : 'Hide password'}</span>
+                      {showNewPassword ? <EyeOff /> : <Eye />}
+                       <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
@@ -449,8 +435,8 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
-                      {showConfirmPassword ? <Eye /> : <EyeOff />}
-                       <span className="sr-only">{showConfirmPassword ? 'Show password' : 'Hide password'}</span>
+                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                       <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}
