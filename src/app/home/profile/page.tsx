@@ -41,6 +41,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(true);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const {
     register,
@@ -250,7 +251,7 @@ export default function ProfilePage() {
                     control={control}
                     name="dob"
                     render={({ field }) => (
-                      <Popover>
+                      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant={"outline"}
@@ -270,7 +271,10 @@ export default function ProfilePage() {
                             fromYear={new Date().getFullYear() - 120}
                             toYear={new Date().getFullYear()}
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={(date) => {
+                              field.onChange(date);
+                              setIsCalendarOpen(false);
+                            }}
                             defaultMonth={field.value}
                             disabled={(date) =>
                               date > new Date() || date < new Date("1900-01-01")
