@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { auth, db } from '@/lib/firebase';
-import { updateProfile, onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { updateProfile, onAuthStateChanged, User, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, CalendarIcon } from 'lucide-react';
+import { LogOut, ChevronsUpDown, CalendarIcon, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -34,6 +34,17 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+const passwordSchema = z.object({
+  oldPassword: z.string().min(1, { message: "Old password is required." }),
+  newPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "New passwords do not match.",
+  path: ["confirmPassword"],
+});
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
 export default function ProfilePage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -42,6 +53,10 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -58,6 +73,20 @@ export default function ProfilePage() {
       photoURL: '',
       dob: undefined,
     }
+  });
+
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    reset: resetPasswordForm,
+    formState: { errors: passwordErrors },
+  } = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    },
   });
   
   const photoURL = watch('photoURL');
@@ -124,6 +153,40 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
+
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
+    if (!auth.currentUser?.email) {
+        toast({ title: "Error", description: "No user is logged in.", variant: "destructive" });
+        return;
+    };
+    setIsSavingPassword(true);
+    try {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, data.oldPassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, data.newPassword);
+      
+      toast({
+        title: "Password updated!",
+        description: "Your password has been changed successfully.",
+      });
+      resetPasswordForm();
+    } catch (error: any) {
+      let description = "An unexpected error occurred. Please try again.";
+      if (error.code === 'auth/wrong-password') {
+        description = "The old password you entered is incorrect. Please try again.";
+      } else if (error.code === 'auth/weak-password') {
+        description = "The new password is too weak. Please choose a stronger one.";
+      }
+      toast({
+        title: "Error updating password",
+        description: description,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
 
   const handleLogout = async () => {
     if (!auth.currentUser) return;
@@ -327,6 +390,59 @@ export default function ProfilePage() {
           </CollapsibleContent>
         </Card>
       </Collapsible>
+      
+      <Card className="transition-shadow hover:shadow-md">
+        <CardHeader>
+          <CardTitle className="text-xl font-headline flex items-center gap-2"><KeyRound /> Change Password</CardTitle>
+          <CardDescription>Update your password here. It's recommended to use a strong, unique password.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="oldPassword">Old Password <span className="text-destructive">*</span></Label>
+              <div className="relative">
+                <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
+                  {showOldPassword ? <EyeOff /> : <Eye />}
+                  <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
+                </Button>
+              </div>
+              {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password <span className="text-destructive">*</span></Label>
+               <div className="relative">
+                <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
+                  {showNewPassword ? <EyeOff /> : <Eye />}
+                   <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
+                </Button>
+              </div>
+              {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password <span className="text-destructive">*</span></Label>
+               <div className="relative">
+                <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
+                  {showConfirmPassword ? <EyeOff /> : <Eye />}
+                   <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
+                </Button>
+              </div>
+              {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button type="submit" disabled={isSavingPassword}>
+                {isSavingPassword ? 'Updating...' : 'Update Password'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
 
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader>
@@ -342,3 +458,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

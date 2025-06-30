@@ -7,6 +7,7 @@ import { useState, useEffect } from "react"
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
+import { Eye, EyeOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -27,6 +28,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     setHasMounted(true)
@@ -105,14 +107,27 @@ export default function LoginPage() {
                         Forgot your password?
                       </Link>
                     </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                        className="pr-10"
+                      />
+                       <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                        <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                      </Button>
+                    </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Logging in...' : 'Login'}
@@ -135,3 +150,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+    
