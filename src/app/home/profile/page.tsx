@@ -23,7 +23,7 @@ import { LogOut, ChevronsUpDown, CalendarIcon } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { cn, calculateAge } from '@/lib/utils';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
@@ -106,7 +106,8 @@ export default function ProfilePage() {
 
       // Save additional data to Firestore
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      await setDoc(userDocRef, { dob: data.dob }, { merge: true });
+      await setDoc(userDocRef, { dob: data.dob ? Timestamp.fromDate(data.dob) : null }, { merge: true });
+
 
       setUser(auth.currentUser);
       toast({
@@ -274,6 +275,22 @@ export default function ProfilePage() {
                             onSelect={(date) => {
                               field.onChange(date);
                               setIsCalendarOpen(false);
+                            }}
+                            onMonthChange={(month) => {
+                              const currentValue = field.value || new Date();
+                              const desiredDay = currentValue.getDate();
+                              const daysInNewMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+                              const newDay = Math.min(desiredDay, daysInNewMonth);
+                              const newDate = new Date(
+                                month.getFullYear(),
+                                month.getMonth(),
+                                newDay,
+                                currentValue.getHours(),
+                                currentValue.getMinutes(),
+                                currentValue.getSeconds(),
+                                currentValue.getMilliseconds()
+                              );
+                              field.onChange(newDate);
                             }}
                             defaultMonth={field.value}
                             disabled={(date) =>
