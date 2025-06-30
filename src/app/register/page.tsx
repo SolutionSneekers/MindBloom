@@ -141,6 +141,7 @@ export default function RegisterPage() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     disabled={isLoading}
+                    autoComplete="given-name"
                   />
                 </div>
                  <div className="grid gap-2">
@@ -152,6 +153,7 @@ export default function RegisterPage() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     disabled={isLoading}
+                    autoComplete="family-name"
                   />
                 </div>
               </div>
@@ -165,6 +167,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
+                  autoComplete="email"
                 />
               </div>
               <div className="grid gap-2">
@@ -181,6 +184,7 @@ export default function RegisterPage() {
                     required
                     disabled={isLoading}
                     className="pr-10"
+                    autoComplete="new-password"
                   />
                   <Button
                     type="button"

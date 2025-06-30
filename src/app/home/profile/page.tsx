@@ -309,12 +309,12 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstName">First Name <span className="text-destructive">*</span></Label>
-                        <Input id="firstName" {...register('firstName')} disabled={isSaving} />
+                        <Input id="firstName" {...register('firstName')} disabled={isSaving} autoComplete="given-name" />
                         {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name <span className="text-destructive">*</span></Label>
-                        <Input id="lastName" {...register('lastName')} disabled={isSaving} />
+                        <Input id="lastName" {...register('lastName')} disabled={isSaving} autoComplete="family-name" />
                         {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
                     </div>
                 </div>
@@ -423,9 +423,9 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="oldPassword">Old Password <span className="text-destructive">*</span></Label>
                   <div className="relative">
-                    <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off" />
+                    <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="current-password" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
-                      {showOldPassword ? <EyeOff /> : <Eye />}
+                      {showOldPassword ? <Eye /> : <EyeOff />}
                       <span className="sr-only">{showOldPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
@@ -435,9 +435,9 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">New Password <span className="text-destructive">*</span></Label>
                    <div className="relative">
-                    <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
+                    <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
-                      {showNewPassword ? <EyeOff /> : <Eye />}
+                      {showNewPassword ? <Eye /> : <EyeOff />}
                        <span className="sr-only">{showNewPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
@@ -447,9 +447,9 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm New Password <span className="text-destructive">*</span></Label>
                    <div className="relative">
-                    <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
+                    <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
-                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                      {showConfirmPassword ? <Eye /> : <EyeOff />}
                        <span className="sr-only">{showConfirmPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>

@@ -88,6 +88,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
+                  autoComplete="email"
                 />
               </div>
               <div className="grid gap-2">
@@ -109,6 +110,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
                     className="pr-10"
+                    autoComplete="current-password"
                   />
                    <Button
                     type="button"
@@ -117,7 +119,7 @@ export default function LoginPage() {
                     className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent"
                     onClick={() => setShowPassword((prev) => !prev)}
                   >
-                    {showPassword ? <EyeOff /> : <Eye />}
+                    {showPassword ? <Eye /> : <EyeOff />}
                     <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                   </Button>
                 </div>
