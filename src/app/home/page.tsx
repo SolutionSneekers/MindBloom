@@ -236,7 +236,11 @@ export default function HomePage() {
     <>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
-          Welcome back{firstName && `, ${firstName}`}!
+          Welcome back
+          {firstName && (
+            <>, <span className="text-primary">{firstName}</span></>
+          )}
+          !
         </h1>
         <div className="flex items-center space-x-2">
           <Button asChild>
