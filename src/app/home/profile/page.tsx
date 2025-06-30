@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, CalendarIcon, Eye, EyeOff, KeyRound, User as UserIcon, Settings } from 'lucide-react';
+import { LogOut, ChevronsUpDown, CalendarIcon, EyeOff, Eye, KeyRound, User as UserIcon, Settings } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -92,6 +92,10 @@ export default function ProfilePage() {
   
   const photoURL = watch('photoURL');
 
+  const resetPasswordFields = useCallback(() => {
+    resetPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  }, [resetPasswordForm]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -121,11 +125,8 @@ export default function ProfilePage() {
       setIsLoading(false);
     });
 
-    // Explicitly reset the password form to prevent browser autofill
-    resetPasswordForm();
-
     return () => unsubscribe();
-  }, [reset, resetPasswordForm]);
+  }, [reset]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!auth.currentUser) return;
@@ -142,8 +143,8 @@ export default function ProfilePage() {
       await setDoc(userDocRef, { 
         firstName: data.firstName,
         lastName: data.lastName,
+        dob: data.dob ? Timestamp.fromDate(data.dob) : null,
         photoURL: data.photoURL,
-        dob: data.dob ? Timestamp.fromDate(data.dob) : null 
       }, { merge: true });
 
 
@@ -178,7 +179,7 @@ export default function ProfilePage() {
         title: "Password updated!",
         description: "Your password has been changed successfully.",
       });
-      resetPasswordForm();
+      resetPasswordFields();
     } catch (error: any) {
       let description = "An unexpected error occurred. Please try again.";
       if (error.code === 'auth/wrong-password') {
@@ -403,7 +404,7 @@ export default function ProfilePage() {
       <Collapsible open={isPasswordCollapsibleOpen} onOpenChange={(isOpen) => {
         setIsPasswordCollapsibleOpen(isOpen);
         if (!isOpen) {
-          resetPasswordForm();
+          resetPasswordFields();
         }
       }}>
         <Card className="transition-shadow hover:shadow-md">
@@ -424,8 +425,8 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
-                      {showOldPassword ? <Eye /> : <EyeOff />}
-                      <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
+                      {showOldPassword ? <EyeOff /> : <Eye />}
+                      <span className="sr-only">{showOldPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
@@ -436,8 +437,8 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
-                      {showNewPassword ? <Eye /> : <EyeOff />}
-                       <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
+                      {showNewPassword ? <EyeOff /> : <Eye />}
+                       <span className="sr-only">{showNewPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
@@ -448,8 +449,8 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
-                      {showConfirmPassword ? <Eye /> : <EyeOff />}
-                       <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
+                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                       <span className="sr-only">{showConfirmPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}
