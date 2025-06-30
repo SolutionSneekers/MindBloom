@@ -25,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -80,7 +80,7 @@ export default function HomeLayout({
             href={href}
             onClick={onLinkClick}
             className={cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+              'flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition-all hover:text-primary',
               { 'bg-muted text-primary': isActive }
             )}
           >
@@ -108,7 +108,7 @@ export default function HomeLayout({
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[180px_1fr] lg:grid-cols-[240px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[180px_1fr] lg:grid-cols-[220px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -141,14 +141,19 @@ export default function HomeLayout({
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col w-[240px]">
                  <SheetHeader>
-                   <Link
-                    href="/home"
-                    className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Logo />
-                     <SheetTitle className="sr-only">Menu</SheetTitle>
-                  </Link>
+                   <SheetTitle>
+                     <Link
+                      href="/home"
+                      className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Logo />
+                       <span className="sr-only">MindBloom Home</span>
+                    </Link>
+                   </SheetTitle>
+                   <SheetDescription className="sr-only">
+                     A list of navigation links to browse the application.
+                   </SheetDescription>
                 </SheetHeader>
                 <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
               </SheetContent>
