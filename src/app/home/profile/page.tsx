@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -419,7 +418,7 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
-                      {showOldPassword ? <EyeOff /> : <Eye />}
+                      {showOldPassword ? <Eye /> : <EyeOff />}
                       <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
@@ -431,7 +430,7 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
-                      {showNewPassword ? <EyeOff /> : <Eye />}
+                      {showNewPassword ? <Eye /> : <EyeOff />}
                        <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>
@@ -443,7 +442,7 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="off"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
-                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                      {showConfirmPassword ? <Eye /> : <EyeOff />}
                        <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
                     </Button>
                   </div>

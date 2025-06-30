@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from "next/link"
@@ -165,7 +164,7 @@ export default function RegisterPage() {
                         className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeOff /> : <Eye />}
+                        {showPassword ? <Eye /> : <EyeOff />}
                         <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                       </Button>
                     </div>
