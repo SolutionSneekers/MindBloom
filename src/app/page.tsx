@@ -123,7 +123,7 @@ export default function LoginPage() {
                         className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <Eye /> : <EyeOff />}
+                        {showPassword ? <EyeOff /> : <Eye />}
                         <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
                       </Button>
                     </div>
