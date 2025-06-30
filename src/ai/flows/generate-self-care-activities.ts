@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for generating personalized self-care activity suggestions based on the user's mood.
@@ -23,6 +24,7 @@ const GenerateSelfCareActivitiesInputSchema = z.object({
     .string()
     .optional()
     .describe('An optional journal entry from the user.'),
+  age: z.number().optional().describe('The age of the user.'),
 });
 export type GenerateSelfCareActivitiesInput = z.infer<
   typeof GenerateSelfCareActivitiesInputSchema
@@ -59,15 +61,18 @@ const prompt = ai.definePrompt({
   name: 'generateSelfCareActivitiesPrompt',
   input: {schema: GenerateSelfCareActivitiesInputSchema},
   output: {schema: GenerateSelfCareActivitiesOutputSchema},
-  prompt: `You are a helpful AI assistant that provides personalized self-care activity suggestions based on the user's current mood, stress level, and optional journal entry.
+  prompt: `You are a helpful AI assistant that provides personalized self-care activity suggestions based on the user's current mood, stress level, age, and optional journal entry.
 
   Mood: {{{mood}}}
   Stress Level (1-10): {{{stressLevel}}}
+  {{#if age}}
+  Age: {{{age}}}
+  {{/if}}
   {{#if journalEntry}}
   User's thoughts: {{{journalEntry}}}
   {{/if}}
 
-  Suggest a list of 5-6 self-care activities that are appropriate for the user's current state. If the user provided their thoughts, use that as the primary context for your suggestions.
+  Suggest a list of 5-6 self-care activities that are appropriate for the user's current state. If the user provided their thoughts, use that as the primary context for your suggestions. Factor in the user's age for age-appropriate suggestions.
 
   For each activity, provide a title, a short one-sentence description, and a category. The category MUST be one of the following: Breathing, Journaling, Movement, Music, Games, Surprise Me.
   

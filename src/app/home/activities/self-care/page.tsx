@@ -15,8 +15,9 @@ import { Button } from '@/components/ui/button';
 import { Heart, Brain, Music, Gamepad2, Feather, Shuffle, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { calculateAge } from '@/lib/utils';
 
 type Activity = GenerateSelfCareActivitiesOutput['activities'][0];
 
@@ -36,6 +37,7 @@ function SelfCareActivitiesContent() {
   const [mood, setMood] = useState<string | null>(null);
   const [stressLevel, setStressLevel] = useState<number | null>(null);
   const [journalEntry, setJournalEntry] = useState<string | null>(null);
+  const [age, setAge] = useState<number | undefined>(undefined);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,14 +52,31 @@ function SelfCareActivitiesContent() {
   // New state for loading last check-in
   const [isLastCheckinLoading, setIsLastCheckinLoading] = useState(false);
 
+  const fetchUserAge = useCallback(async () => {
+    if (auth.currentUser) {
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.dob && userData.dob instanceof Timestamp) {
+          setAge(calculateAge(userData.dob.toDate()));
+          return calculateAge(userData.dob.toDate());
+        }
+      }
+    }
+    return undefined;
+  }, []);
+
   const fetchActivities = useCallback(async (mood: string, stressLevel: number, journalEntry?: string) => {
     try {
       setLoading(true);
       setError(null);
+      const userAge = await fetchUserAge();
       const result = await generateSelfCareActivities({
         mood,
         stressLevel,
         journalEntry: journalEntry || undefined,
+        age: userAge,
       });
       setActivities(result.activities);
     } catch (e) {
@@ -66,7 +85,7 @@ function SelfCareActivitiesContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUserAge]);
 
   useEffect(() => {
     const moodParam = searchParams.get('mood');
@@ -143,11 +162,13 @@ function SelfCareActivitiesContent() {
       if (!mood || !stressLevel) {
         throw new Error("Mood and stress level are required to get details.");
       }
+      const userAge = await fetchUserAge();
       const result = await generateActivityDetails({
         mood,
         stressLevel,
         activity: activity.title,
         journalEntry: journalEntry || undefined,
+        age: userAge,
       });
       setActivityDetails(result.details);
     } catch (e) {

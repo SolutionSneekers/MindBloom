@@ -4,7 +4,8 @@
 import { useState, useEffect, useCallback, FormEvent } from 'react';
 import { generateJournalingPrompts } from '@/ai/flows/generate-journaling-prompts';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc } from 'firebase/firestore';
+import { calculateAge } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -38,6 +39,7 @@ export default function JournalPage() {
   const [isLoadingPrompt, setIsLoadingPrompt] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [currentDate, setCurrentDate] = useState<string>('');
+  const [age, setAge] = useState<number | undefined>(undefined);
 
   // State for past entries
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
@@ -96,17 +98,32 @@ export default function JournalPage() {
     }
   }, [toast]);
 
+  const fetchUserAge = useCallback(async () => {
+    if (auth.currentUser) {
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.dob && userData.dob instanceof Timestamp) {
+          setAge(calculateAge(userData.dob.toDate()));
+        }
+      }
+    }
+  }, []);
+
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
         fetchJournalEntries();
+        fetchUserAge();
       } else {
         setIsLoadingEntries(false);
         setPastEntries([]);
       }
     });
     return () => unsubscribe();
-  }, [fetchJournalEntries]);
+  }, [fetchJournalEntries, fetchUserAge]);
 
   const handleGetPrompt = async (mood: string) => {
     setSelectedMood(mood);
@@ -115,7 +132,7 @@ export default function JournalPage() {
     setIsLoadingPrompt(true);
     setPrompt('Generating a new prompt for you...');
     try {
-      const result = await generateJournalingPrompts({ mood });
+      const result = await generateJournalingPrompts({ mood, age });
       setPrompt(result.prompt);
     } catch (error) {
       console.error(error);

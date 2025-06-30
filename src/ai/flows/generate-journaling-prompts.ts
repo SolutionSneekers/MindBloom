@@ -1,3 +1,4 @@
+
 // The use server directive is required for all flow files.
 'use server';
 
@@ -22,6 +23,7 @@ const GenerateJournalingPromptsInputSchema = z.object({
     .string()
     .optional()
     .describe('Optional journal entry the user has already written.'),
+  age: z.number().optional().describe('The age of the user.'),
 });
 export type GenerateJournalingPromptsInput = z.infer<
   typeof GenerateJournalingPromptsInputSchema
@@ -49,13 +51,14 @@ const prompt = ai.definePrompt({
   name: 'generateJournalingPromptsPrompt',
   input: {schema: GenerateJournalingPromptsInputSchema},
   output: {schema: GenerateJournalingPromptsOutputSchema},
-  prompt: `You are a helpful AI assistant designed to provide journaling prompts to users based on their current mood.
+  prompt: `You are a helpful AI assistant designed to provide journaling prompts to users based on their current mood and age.
 
   The goal is to help users explore their feelings and encourage self-reflection.
 
-  Generate a single journaling prompt that is tailored to the user's mood.
+  Generate a single journaling prompt that is tailored to the user's mood and age.
 
   Mood: {{{mood}}}
+  {{#if age}}Age: {{{age}}}{{/if}}
   {{~#if journalEntry}}Journal Entry: {{{journalEntry}}}{{/if}}
   `,
 });

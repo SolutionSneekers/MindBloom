@@ -3,12 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { updateProfile, onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,14 +19,17 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown } from 'lucide-react';
+import { LogOut, ChevronsUpDown, CalendarIcon } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
   lastName: z.string().min(1, { message: 'Last name is required.' }).max(50),
   photoURL: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  dob: z.date().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -35,13 +40,14 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(true);
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -49,22 +55,36 @@ export default function ProfilePage() {
       firstName: '',
       lastName: '',
       photoURL: '',
+      dob: undefined,
     }
   });
   
   const photoURL = watch('photoURL');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const nameParts = currentUser.displayName?.split(' ') || ['', ''];
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
+
+        // Fetch additional user data from Firestore
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        let dob;
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          if (userData.dob && userData.dob instanceof Timestamp) {
+            dob = userData.dob.toDate();
+          }
+        }
+        
         reset({
           firstName: firstName,
           lastName: lastName,
           photoURL: currentUser.photoURL || '',
+          dob: dob
         });
       }
       setIsLoading(false);
@@ -82,6 +102,11 @@ export default function ProfilePage() {
         displayName: `${data.firstName} ${data.lastName}`.trim(),
         photoURL: data.photoURL,
       });
+
+      // Save additional data to Firestore
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      await setDoc(userDocRef, { dob: data.dob }, { merge: true });
+
       setUser(auth.currentUser);
       toast({
         title: 'Profile updated!',
@@ -217,6 +242,45 @@ export default function ProfilePage() {
                         <Input id="lastName" {...register('lastName')} disabled={isSaving} />
                         {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
                     </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dob">Date of Birth</Label>
+                  <Controller
+                    control={control}
+                    name="dob"
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            captionLayout="dropdown-buttons"
+                            fromYear={new Date().getFullYear() - 120}
+                            toYear={new Date().getFullYear()}
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />
+                  {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
                 </div>
 
                 <div className="space-y-2">
