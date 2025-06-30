@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
       // Save/update user data in Firestore
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      await setDoc(userDocRef, { 
+      await setDoc(userDocRef, {
         firstName: data.firstName,
         lastName: data.lastName,
         photoURL: data.photoURL,
@@ -372,7 +372,7 @@ export default function ProfilePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={user.email || ''} disabled />
+                  <Input id="email" type="email" value={user.email || ''} disabled autoComplete="email" />
                    <p className="text-sm text-muted-foreground">You cannot change your email address here.</p>
                 </div>
 
@@ -411,8 +411,8 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Input id="oldPassword" type={showOldPassword ? 'text' : 'password'} {...registerPassword('oldPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="current-password" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowOldPassword(s => !s)}>
-                      {showOldPassword ? <EyeOff /> : <Eye />}
-                      <span className="sr-only">{showOldPassword ? 'Hide password' : 'Show password'}</span>
+                      {showOldPassword ? <Eye /> : <EyeOff />}
+                      <span className="sr-only">{showOldPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.oldPassword && <p className="text-sm text-destructive">{passwordErrors.oldPassword.message}</p>}
@@ -423,8 +423,8 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="newPassword" type={showNewPassword ? 'text' : 'password'} {...registerPassword('newPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowNewPassword(s => !s)}>
-                      {showNewPassword ? <EyeOff /> : <Eye />}
-                       <span className="sr-only">{showNewPassword ? 'Hide password' : 'Show password'}</span>
+                      {showNewPassword ? <Eye /> : <EyeOff />}
+                       <span className="sr-only">{showNewPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.newPassword && <p className="text-sm text-destructive">{passwordErrors.newPassword.message}</p>}
@@ -435,8 +435,8 @@ export default function ProfilePage() {
                    <div className="relative">
                     <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirmPassword')} disabled={isSavingPassword} className="pr-10" autoComplete="new-password"/>
                     <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:bg-transparent" onClick={() => setShowConfirmPassword(s => !s)}>
-                      {showConfirmPassword ? <EyeOff /> : <Eye />}
-                       <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
+                      {showConfirmPassword ? <Eye /> : <EyeOff />}
+                       <span className="sr-only">{showConfirmPassword ? 'Show password' : 'Hide password'}</span>
                     </Button>
                   </div>
                   {passwordErrors.confirmPassword && <p className="text-sm text-destructive">{passwordErrors.confirmPassword.message}</p>}
@@ -457,12 +457,19 @@ export default function ProfilePage() {
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader>
           <CardTitle className="text-xl font-headline flex items-center gap-2"><Settings /> Account Actions</CardTitle>
-          <CardDescription>Manage your account session.</CardDescription>
+          <CardDescription>Manage your account session and preferences.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
-            <LogOut className="mr-2 h-4 w-4" /> Log Out
-          </Button>
+          <div className="flex flex-wrap items-center gap-4">
+            <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
+              <LogOut className="mr-2 h-4 w-4" /> Log Out
+            </Button>
+             <Button asChild variant="outline" className="w-full sm:w-auto">
+              <Link href="/home/settings">
+                <Settings className="mr-2 h-4 w-4" /> Settings
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
