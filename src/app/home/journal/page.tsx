@@ -44,6 +44,7 @@ export default function JournalPage() {
   // State for past entries
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [isLoadingEntries, setIsLoadingEntries] = useState(true);
+  const [showAllEntries, setShowAllEntries] = useState(false);
 
   // State for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -248,6 +249,8 @@ export default function JournalPage() {
     }
   }, [selectedEntry, toast, fetchJournalEntries]);
 
+  const displayedEntries = showAllEntries ? pastEntries : pastEntries.slice(0, 7);
+
   return (
     <div className="space-y-6">
       <div>
@@ -337,35 +340,44 @@ export default function JournalPage() {
               ))}
             </div>
           ) : pastEntries.length > 0 ? (
-            pastEntries.map((entry) => (
-              <Card key={entry.id} className="p-4 transition-shadow hover:shadow-md">
-                 <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold">{entry.createdAt}</p>
-                      {entry.prompt && <p className="text-sm text-muted-foreground italic mt-1">&quot;{entry.prompt}&quot;</p>}
+            <>
+              {displayedEntries.map((entry) => (
+                <Card key={entry.id} className="p-4 transition-shadow hover:shadow-md">
+                   <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold">{entry.createdAt}</p>
+                        {entry.prompt && <p className="text-sm text-muted-foreground italic mt-1">&quot;{entry.prompt}&quot;</p>}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            <span>Edit</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                <p className="text-muted-foreground mt-4 whitespace-pre-wrap">{entry.entry}</p>
-              </Card>
-            ))
+                  <p className="text-muted-foreground mt-4 whitespace-pre-wrap">{entry.entry}</p>
+                </Card>
+              ))}
+              {pastEntries.length > 7 && (
+                <div className="mt-6 flex justify-center">
+                  <Button variant="outline" onClick={() => setShowAllEntries(!showAllEntries)}>
+                    {showAllEntries ? 'Show Less' : `Show All (${pastEntries.length}) Entries`}
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-center text-muted-foreground py-8">You have no past journal entries.</p>
           )}

@@ -38,6 +38,7 @@ export default function MoodHistoryPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [showAll, setShowAll] = useState(false);
 
   const [editMood, setEditMood] = useState('');
   const [editStressLevel, setEditStressLevel] = useState([3]);
@@ -191,6 +192,8 @@ export default function MoodHistoryPage() {
     }
   }, [selectedEntry, editMood, editStressLevel, editJournalEntry, fetchMoodHistory, toast]);
 
+  const displayedEntries = showAll ? moodHistoryData : moodHistoryData.slice(0, 7);
+
   return (
     <div className="space-y-6">
       <div>
@@ -227,73 +230,82 @@ export default function MoodHistoryPage() {
                 ))}
              </div>
           ) : (
-            <div className="w-full overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="hidden md:table-cell">Date</TableHead>
-                    <TableHead>Mood</TableHead>
-                    <TableHead className="text-center">Stress</TableHead>
-                    <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => {
-                    const displayDate = new Date(entry.date).toLocaleDateString();
-                    return (
-                    <TableRow key={entry.id}>
-                       <TableCell className="hidden md:table-cell font-medium">{displayDate}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Badge
-                            variant={
-                              entry.mood === 'Angry' ? 'destructive'
-                              : entry.mood === 'Happy' ? 'default'
-                              : 'secondary'
-                            }
-                            className="w-fit"
-                          >
-                            {entry.mood}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground md:hidden">{displayDate}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">{entry.stressLevel}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <p className="max-w-xs truncate text-muted-foreground italic">
-                          &quot;{entry.journalEntry || 'No journal entry.'}&quot;
-                        </p>
-                      </TableCell>
-                      <TableCell className="text-right">
-                         <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                <span>Edit</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span>Delete</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )}) : (
+            <>
+              <div className="w-full overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
+                      <TableHead className="hidden md:table-cell">Date</TableHead>
+                      <TableHead>Mood</TableHead>
+                      <TableHead className="text-center">Stress</TableHead>
+                      <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {displayedEntries.length > 0 ? displayedEntries.map((entry) => {
+                      const displayDate = new Date(entry.date).toLocaleDateString();
+                      return (
+                      <TableRow key={entry.id}>
+                         <TableCell className="hidden md:table-cell font-medium">{displayDate}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Badge
+                              variant={
+                                entry.mood === 'Angry' ? 'destructive'
+                                : entry.mood === 'Happy' ? 'default'
+                                : 'secondary'
+                              }
+                              className="w-fit"
+                            >
+                              {entry.mood}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground md:hidden">{displayDate}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">{entry.stressLevel}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <p className="max-w-xs truncate text-muted-foreground italic">
+                            &quot;{entry.journalEntry || 'No journal entry.'}&quot;
+                          </p>
+                        </TableCell>
+                        <TableCell className="text-right">
+                           <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <span className="sr-only">Open menu</span>
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  <span>Edit</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  <span>Delete</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    )}) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              {moodHistoryData.length > 7 && (
+                <div className="mt-6 flex justify-center">
+                  <Button variant="outline" onClick={() => setShowAll(!showAll)}>
+                    {showAll ? 'Show Less' : `Show All (${moodHistoryData.length}) Entries`}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
