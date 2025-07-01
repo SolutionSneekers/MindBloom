@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from "next/link"
@@ -288,11 +289,14 @@ export default function HomePage() {
             </div>
             <Separator />
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">Mood Check-ins</span>
-              </div>
-              <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : checkInCount}</div>
+                <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex flex-col">
+                        <span className="font-medium leading-none">Mood Check-ins</span>
+                        <span className="text-xs text-muted-foreground">(last 30 days)</span>
+                    </div>
+                </div>
+                <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : checkInCount}</div>
             </div>
              <Separator />
             <div className="flex items-center justify-between">
