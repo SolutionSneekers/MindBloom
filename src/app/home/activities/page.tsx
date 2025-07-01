@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Wind, Heart, ArrowRight } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Wind, Heart } from 'lucide-react';
 
 const activityPages = [
     {
@@ -44,11 +45,6 @@ export default function ActivitiesPage() {
                                 </div>
                             </CardHeader>
                             <CardContent className="flex-grow" />
-                            <CardFooter>
-                                <div className="flex items-center text-sm font-medium text-primary">
-                                    Start Activity <ArrowRight className="ml-2 h-4 w-4" />
-                                </div>
-                            </CardFooter>
                         </Card>
                     </Link>
                 ))}
