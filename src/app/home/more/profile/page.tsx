@@ -260,8 +260,8 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile & Settings</h1>
-        <p className="text-muted-foreground">Manage your account settings and profile details.</p>
+        <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile</h1>
+        <p className="text-muted-foreground">Manage your personal details and account information.</p>
       </div>
       
       <Collapsible open={isCollapsibleOpen} onOpenChange={setIsCollapsibleOpen}>
@@ -414,8 +414,8 @@ export default function ProfilePage() {
 
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader>
-          <CardTitle className="text-xl font-headline flex items-center gap-2"><Settings /> Account Actions</CardTitle>
-          <CardDescription>Manage your account session and preferences.</CardDescription>
+          <CardTitle className="text-xl font-headline flex items-center gap-2">Account Actions</CardTitle>
+          <CardDescription>Manage your account session.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-center gap-4">
