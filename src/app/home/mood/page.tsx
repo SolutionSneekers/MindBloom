@@ -1,8 +1,7 @@
-
 'use client';
 
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Smile, History } from 'lucide-react';
 
 const moodPages = [
@@ -44,7 +43,6 @@ export default function MoodPage() {
                                     </div>
                                 </div>
                             </CardHeader>
-                            <CardContent className="flex-grow" />
                         </Card>
                     </Link>
                 ))}
