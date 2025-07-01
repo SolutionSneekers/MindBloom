@@ -463,11 +463,6 @@ export default function ProfilePage() {
             <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
               <LogOut className="mr-2 h-4 w-4" /> Log Out
             </Button>
-             <Button asChild variant="outline" className="w-full sm:w-auto">
-              <Link href="/home/settings">
-                <Settings className="mr-2 h-4 w-4" /> Settings
-              </Link>
-            </Button>
           </div>
         </CardContent>
       </Card>

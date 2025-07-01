@@ -12,6 +12,7 @@ import {
   Home,
   LogOut,
   Menu,
+  MoreHorizontal,
   Settings,
   Smile,
   User as UserIcon,
@@ -25,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -37,7 +38,7 @@ const navItems = [
   { href: '/home/mood', label: 'Mood', icon: Smile },
   { href: '/home/journal', label: 'Journal', icon: BookOpen },
   { href: '/home/activities', label: 'Activities', icon: Activity },
-  { href: '/home/profile', label: 'Profile', icon: UserIcon },
+  { href: '/home/more', label: 'More', icon: MoreHorizontal },
 ];
 
 export default function HomeLayout({
