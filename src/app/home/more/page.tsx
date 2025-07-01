@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -9,13 +10,13 @@ const morePages = [
     {
         title: "Profile",
         description: "Manage your personal details and account information.",
-        href: "/home/profile",
+        href: "/home/more/profile",
         icon: User,
     },
     {
         title: "Settings",
         description: "Customize your application preferences, like theme.",
-        href: "/home/settings",
+        href: "/home/more/settings",
         icon: Settings,
     }
 ];

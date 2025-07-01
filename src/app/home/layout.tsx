@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from 'next/link';
@@ -187,13 +188,13 @@ export default function HomeLayout({
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/home/profile">
+                <Link href="/home/more/profile">
                   <UserIcon className="mr-2 h-4 w-4" />
                   Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/home/settings">
+                <Link href="/home/more/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </Link>
