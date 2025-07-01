@@ -72,7 +72,7 @@ export function DatePickerDialog({
           {value ? format(value, "PPP") : <span>Pick a date</span>}
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-0 w-auto overflow-hidden rounded-lg">
+      <DialogContent className="p-0 w-auto rounded-lg overflow-hidden">
         <DialogHeader className="p-6 pb-2 bg-primary text-primary-foreground">
            <DialogTitle className="uppercase tracking-wider font-semibold text-primary-foreground/90">
              {selectedDate ? format(selectedDate, 'yyyy') : 'Date of Birth'}
@@ -95,9 +95,9 @@ export function DatePickerDialog({
             disabled={disabled}
           />
         </div>
-        <DialogFooter className="px-6 pb-6 pt-2 flex justify-end gap-2">
+        <DialogFooter className="flex-row justify-end gap-2 p-6 pt-0">
           <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
+            <Button type="button" variant="ghost">Cancel</Button>
           </DialogClose>
           <Button onClick={handleApply}>OK</Button>
         </DialogFooter>
