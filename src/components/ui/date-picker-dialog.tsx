@@ -32,17 +32,19 @@ export function DatePickerDialog({
   toYear,
   disabled,
 }: DatePickerDialogProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  // Temporary state for the date while the dialog is open
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(value);
   const [month, setMonth] = React.useState<Date>(value || new Date());
-  const [isOpen, setIsOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    // Sync internal state with external value when dialog opens or value changes
-    if (isOpen || value !== selectedDate) {
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      // When the dialog opens, initialize its state with the value from the form
       setSelectedDate(value);
       setMonth(value || new Date());
     }
-  }, [value, isOpen, selectedDate]);
+    setIsOpen(open);
+  };
 
   const handleApply = () => {
     onChange(selectedDate);
@@ -50,7 +52,7 @@ export function DatePickerDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant={"outline"}
