@@ -37,6 +37,13 @@ export function DatePickerDialog({
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(value);
   const [month, setMonth] = React.useState<Date>(value || new Date());
 
+  // When the value prop changes, update the internal state
+  React.useEffect(() => {
+    setSelectedDate(value);
+    setMonth(value || new Date());
+  }, [value]);
+
+
   const handleOpenChange = (open: boolean) => {
     if (open) {
       // When the dialog opens, initialize its state with the value from the form
@@ -65,8 +72,8 @@ export function DatePickerDialog({
           {value ? format(value, "PPP") : <span>Pick a date</span>}
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-0 w-auto">
-        <DialogHeader className="p-6 pb-2 bg-primary text-primary-foreground rounded-t-lg">
+      <DialogContent className="p-0 w-auto overflow-hidden rounded-lg">
+        <DialogHeader className="p-6 pb-2 bg-primary text-primary-foreground">
            <DialogTitle className="uppercase tracking-wider font-semibold text-primary-foreground/90">
              {selectedDate ? format(selectedDate, 'yyyy') : 'Date of Birth'}
            </DialogTitle>
