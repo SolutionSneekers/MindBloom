@@ -88,11 +88,11 @@ function SelfCareActivitiesContent() {
     }
   }, [fetchUserAge]);
 
-  useEffect(() => {
-    const moodParam = searchParams.get('mood');
-    const stressLevelParam = searchParams.get('stressLevel');
-    const journalEntryParam = searchParams.get('journalEntry');
+  const moodParam = searchParams.get('mood');
+  const stressLevelParam = searchParams.get('stressLevel');
+  const journalEntryParam = searchParams.get('journalEntry');
 
+  useEffect(() => {
     if (moodParam && stressLevelParam) {
       const stressLevelNum = parseInt(stressLevelParam, 10);
       setMood(moodParam);
@@ -102,7 +102,7 @@ function SelfCareActivitiesContent() {
     } else {
       setLoading(false);
     }
-  }, [searchParams, fetchActivities]);
+  }, [moodParam, stressLevelParam, journalEntryParam, fetchActivities]);
 
   const handleUseLastCheckin = useCallback(async () => {
     if (!auth.currentUser) {
