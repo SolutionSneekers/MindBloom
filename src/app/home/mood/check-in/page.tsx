@@ -19,7 +19,7 @@ export default function MoodCheckInPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [stressLevel, setStressLevel] = useState([5]);
+  const [stressLevel, setStressLevel] = useState([3]);
   const [journalEntry, setJournalEntry] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -117,7 +117,7 @@ export default function MoodCheckInPage() {
                 value={stressLevel}
                 onValueChange={setStressLevel}
                 min={1}
-                max={10}
+                max={5}
                 step={1}
                 disabled={isLoading}
               />

@@ -1,13 +1,14 @@
+
 'use client'
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { valueToMood, moodEmojis } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface MoodChartData {
     name: string; // date e.g., 'Jul 20'
@@ -32,7 +33,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           </div>
           <div className="flex justify-between items-center gap-4">
             <span className="text-muted-foreground">Stress Level:</span>
-            <span className="font-semibold">{data.stressLevel}/10</span>
+            <span className="font-semibold">{data.stressLevel}/5</span>
           </div>
         </div>
       </div>
@@ -63,7 +64,7 @@ const DetailsCard = ({ entry, onClose }: { entry: MoodChartData; onClose: () => 
              </div>
              <div className="flex justify-between items-center gap-4">
                  <span className="text-muted-foreground">Stress Level:</span>
-                 <span className="font-semibold">{entry.stressLevel}/10</span>
+                 <span className="font-semibold">{entry.stressLevel}/5</span>
              </div>
         </CardContent>
       </Card>

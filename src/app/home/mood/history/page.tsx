@@ -40,7 +40,7 @@ export default function MoodHistoryPage() {
   const { toast } = useToast();
 
   const [editMood, setEditMood] = useState('');
-  const [editStressLevel, setEditStressLevel] = useState([5]);
+  const [editStressLevel, setEditStressLevel] = useState([3]);
   const [editJournalEntry, setEditJournalEntry] = useState('');
 
   const fetchMoodHistory = useCallback(async () => {
@@ -350,7 +350,7 @@ export default function MoodHistoryPage() {
                     value={editStressLevel}
                     onValueChange={setEditStressLevel}
                     min={1}
-                    max={10}
+                    max={5}
                     step={1}
                   />
                   <span className="text-sm text-muted-foreground">High</span>

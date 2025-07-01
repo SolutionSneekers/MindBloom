@@ -18,8 +18,8 @@ const GenerateSelfCareActivitiesInputSchema = z.object({
   stressLevel: z
     .number()
     .min(1)
-    .max(10)
-    .describe('The stress level of the user on a scale of 1 to 10.'),
+    .max(5)
+    .describe('The stress level of the user on a scale of 1 to 5.'),
   journalEntry: z
     .string()
     .optional()
@@ -64,7 +64,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a helpful AI assistant that provides personalized self-care activity suggestions based on the user's current mood, stress level, age, and optional journal entry.
 
   Mood: {{{mood}}}
-  Stress Level (1-10): {{{stressLevel}}}
+  Stress Level (1-5): {{{stressLevel}}}
   {{#if age}}
   Age: {{{age}}}
   {{/if}}

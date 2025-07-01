@@ -18,8 +18,8 @@ const GenerateActivityDetailsInputSchema = z.object({
   stressLevel: z
     .number()
     .min(1)
-    .max(10)
-    .describe('The stress level of the user on a scale of 1 to 10.'),
+    .max(5)
+    .describe('The stress level of the user on a scale of 1 to 5.'),
   activity: z.string().describe('The self-care activity to get details for.'),
   journalEntry: z
     .string()
@@ -50,7 +50,7 @@ const prompt = ai.definePrompt({
   name: 'generateActivityDetailsPrompt',
   input: {schema: GenerateActivityDetailsInputSchema},
   output: {schema: GenerateActivityDetailsOutputSchema},
-  prompt: `You are a warm, empathetic wellness coach. A user is feeling {{mood}} with a stress level of {{stressLevel}} out of 10. They have chosen the activity: "{{activity}}".
+  prompt: `You are a warm, empathetic wellness coach. A user is feeling {{mood}} with a stress level of {{stressLevel}} out of 5. They have chosen the activity: "{{activity}}".
   {{#if age}}The user is {{age}} years old.{{/if}}
   {{#if journalEntry}}
   They also wrote about what's on their mind: "{{{journalEntry}}}"
