@@ -9,7 +9,6 @@ import { auth, db } from '@/lib/firebase';
 import { updateProfile, onAuthStateChanged, User, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
 import { useLogout } from '@/hooks/use-logout';
 
 import { Button } from '@/components/ui/button';
@@ -19,11 +18,10 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, CalendarIcon, Eye, EyeOff, KeyRound, User as UserIcon, Settings } from 'lucide-react';
+import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Settings } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn, calculateAge } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { DatePickerDialog } from '@/components/ui/date-picker-dialog';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
@@ -52,7 +50,6 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   const [isPasswordCollapsibleOpen, setIsPasswordCollapsibleOpen] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -306,59 +303,20 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dob">Date of Birth</Label>
-                  <Controller
+                  <Label>Date of Birth</Label>
+                   <Controller
                     control={control}
                     name="dob"
                     render={({ field }) => (
-                      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            captionLayout="dropdown-buttons"
-                            fromYear={new Date().getFullYear() - 120}
-                            toYear={new Date().getFullYear()}
-                            selected={field.value}
-                            onSelect={(date) => {
-                              field.onChange(date);
-                              setIsCalendarOpen(false);
-                            }}
-                            onMonthChange={(month) => {
-                              const currentValue = field.value || new Date();
-                              const desiredDay = currentValue.getDate();
-                              const daysInNewMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-                              const newDay = Math.min(desiredDay, daysInNewMonth);
-                              const newDate = new Date(
-                                month.getFullYear(),
-                                month.getMonth(),
-                                newDay,
-                                currentValue.getHours(),
-                                currentValue.getMinutes(),
-                                currentValue.getSeconds(),
-                                currentValue.getMilliseconds()
-                              );
-                              field.onChange(newDate);
-                            }}
-                            defaultMonth={field.value}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                       <DatePickerDialog
+                        value={field.value}
+                        onChange={field.onChange}
+                        fromYear={new Date().getFullYear() - 120}
+                        toYear={new Date().getFullYear()}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                      />
                     )}
                   />
                   {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
