@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from "next/link"
@@ -249,7 +248,7 @@ export default function HomePage() {
         </h1>
         <Button asChild>
           <Link href="/home/mood/check-in">
-            <Smile className="mr-2 h-4 w-4" /> New Check-in
+            <Smile className="mr-2 h-4 w-4" /> New Mood Check-in
           </Link>
         </Button>
       </div>
@@ -291,7 +290,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">Check-ins</span>
+                <span className="font-medium">Mood Check-ins</span>
               </div>
               <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : checkInCount}</div>
             </div>

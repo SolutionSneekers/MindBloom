@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -47,7 +46,7 @@ export default function MoodCheckInPage() {
       await addDoc(collection(db, 'moods'), moodLog);
 
       toast({
-        title: "Check-in saved!",
+        title: "Mood check-in saved!",
         description: "Your mood has been logged.",
       });
 
@@ -59,7 +58,7 @@ export default function MoodCheckInPage() {
       console.error("Error adding document: ", error);
       toast({
         title: "Error",
-        description: "Could not save your check-in. Please try again.",
+        description: "Could not save your mood check-in. Please try again.",
         variant: "destructive",
       });
     } finally {

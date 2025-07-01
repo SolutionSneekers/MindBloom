@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Suspense } from 'react';
@@ -136,7 +135,7 @@ function SelfCareActivitiesContent() {
       } else {
         toast({
           title: "Not Found",
-          description: "No previous check-in found. Please complete one first.",
+          description: "No previous mood check-in found. Please complete one first.",
           variant: "destructive",
         });
       }
@@ -144,7 +143,7 @@ function SelfCareActivitiesContent() {
       console.error(e);
       toast({
         title: "Error",
-        description: "Could not fetch your last check-in.",
+        description: "Could not fetch your last mood check-in.",
         variant: "destructive",
       });
     } finally {
@@ -218,10 +217,10 @@ function SelfCareActivitiesContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button onClick={handleUseLastCheckin} disabled={isLastCheckinLoading}>
                     {isLastCheckinLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Use Last Check-in
+                    Use Last Mood Check-in
                 </Button>
                 <Button asChild>
-                    <Link href="/home/mood/check-in">New Check-in</Link>
+                    <Link href="/home/mood/check-in">New Mood Check-in</Link>
                 </Button>
             </div>
         </Card>

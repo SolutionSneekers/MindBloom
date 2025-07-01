@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, FormEvent, useCallback, useMemo } from "react";
@@ -55,8 +54,7 @@ export default function MoodHistoryPage() {
       const q = query(
         collection(db, "moods"),
         where("userId", "==", auth.currentUser.uid),
-        orderBy("createdAt", "desc"),
-        limit(30)
+        orderBy("createdAt", "desc")
       );
       const querySnapshot = await getDocs(q);
       
@@ -217,7 +215,7 @@ export default function MoodHistoryPage() {
 
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader>
-          <CardTitle className="font-headline text-xl">Check-in Log</CardTitle>
+          <CardTitle className="font-headline text-xl">Mood Check-in Log</CardTitle>
           <CardDescription>
             A detailed log of your recent mood entries. You can edit or delete entries here.
           </CardDescription>
@@ -292,7 +290,7 @@ export default function MoodHistoryPage() {
                       </TableRow>
                     )}) : (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center h-24">No check-ins yet.</TableCell>
+                        <TableCell colSpan={5} className="text-center h-24">No mood check-ins yet.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
