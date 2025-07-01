@@ -2,7 +2,6 @@
 'use client';
 
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { generateSelfCareActivities, type GenerateSelfCareActivitiesOutput } from '@/ai/flows/generate-self-care-activities';
@@ -18,6 +17,7 @@ import { auth, db } from '@/lib/firebase';
 import { collection, query, where, orderBy, limit, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { calculateAge } from '@/lib/utils';
+import Link from 'next/link';
 
 type Activity = GenerateSelfCareActivitiesOutput['activities'][0];
 

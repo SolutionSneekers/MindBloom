@@ -31,7 +31,6 @@ import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescri
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useLogout } from '@/hooks/use-logout';
 
 const navItems = [
@@ -122,7 +121,6 @@ export default function HomeLayout({
             <NavLinks className="px-2 lg:px-4"/>
           </div>
           <div className="mt-auto p-4">
-             {/* Can add a card or other component here */}
           </div>
         </div>
       </div>
@@ -172,7 +170,6 @@ export default function HomeLayout({
             </Link>
           </div>
           <div className="w-full flex-1">
-            {/* Can add a search bar here if needed */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
