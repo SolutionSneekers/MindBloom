@@ -1,19 +1,20 @@
+
 'use client'
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import {
-  Activity,
-  ArrowUpRight,
   BookOpen,
   Calendar,
+  HeartPulse,
   Smile,
+  Sparkles,
   TrendingUp,
   Wind,
 } from "lucide-react"
 import { auth, db } from "@/lib/firebase"
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "firebase/firestore"
-import { onAuthStateChanged, User } from "firebase/auth"
+import { onAuthStateChanged } from "firebase/auth"
 import { generateDailyAffirmation } from "@/ai/flows/generate-daily-affirmation"
 
 import { Button } from "@/components/ui/button"
@@ -27,28 +28,32 @@ import {
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart"
 import { Skeleton } from "@/components/ui/skeleton"
 import { moodToValue, valueToMood } from "@/lib/utils"
+import { Separator } from "@/components/ui/separator"
 
 const quickAccessItems = [
   {
-    title: "New Mood Check-In",
-    description: "Log your current mood and feelings.",
+    title: "Mood Check-In",
+    description: "Log your current feelings.",
     icon: Smile,
     href: "/home/mood/check-in",
-    color: "text-green-500",
+    color: "bg-green-100 dark:bg-green-900/50",
+    iconColor: "text-green-500",
   },
   {
     title: "Start Journaling",
-    description: "Let your thoughts flow freely.",
+    description: "Let your thoughts flow.",
     icon: BookOpen,
     href: "/home/journal",
-    color: "text-blue-500",
+    color: "bg-blue-100 dark:bg-blue-900/50",
+    iconColor: "text-blue-500",
   },
   {
     title: "Breathing Exercise",
-    description: "Find your calm and center yourself.",
+    description: "Find your calm.",
     icon: Wind,
     href: "/home/activities/breathing",
-    color: "text-sky-500",
+    color: "bg-sky-100 dark:bg-sky-900/50",
+    iconColor: "text-sky-500",
   },
 ]
 
@@ -233,7 +238,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">
           Welcome back
@@ -242,113 +247,100 @@ export default function HomePage() {
           )}
           !
         </h1>
-        <div className="flex items-center space-x-2">
-          <Button asChild>
-            <Link href="/home/mood/check-in">
-              <Smile className="mr-2 h-4 w-4" /> New Check-in
-            </Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link href="/home/mood/check-in">
+            <Smile className="mr-2 h-4 w-4" /> New Check-in
+          </Link>
+        </Button>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="transition-shadow hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Journal Streak
+      
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Daily Affirmation Card */}
+        <Card className="col-span-3 lg:col-span-2 bg-primary text-primary-foreground flex flex-col justify-center transition-shadow hover:shadow-lg">
+          <CardHeader>
+            <CardTitle className="font-headline text-xl flex items-center gap-2">
+              <Sparkles /> Daily Affirmation
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-10 inline-block" /> : `${journalStreak} days`}</div>
-            <p className="text-xs text-muted-foreground">
-              Keep up the great work!
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="transition-shadow hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Mood Check-ins
-            </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-10 inline-block" /> : checkInCount}</div>
-            <p className="text-xs text-muted-foreground">
-              in the last 30 days
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="transition-shadow hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Overall Mood
-            </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loadingData ? <Skeleton className="h-8 w-24" /> : overallMood.text}</div>
-            <div className="text-xs text-muted-foreground">
-              Trend {loadingData ? <Skeleton className="h-4 w-16 inline-block" /> : overallMood.trend}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-primary text-primary-foreground transition-shadow hover:shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-headline">Daily Affirmation</CardTitle>
           </CardHeader>
           <CardContent>
             {loadingAffirmation ? (
-              <Skeleton className="h-5 w-3/4 bg-primary-foreground/20" />
+              <Skeleton className="h-6 w-3/4 bg-primary-foreground/20" />
             ) : (
-              <p className="text-base">
+              <p className="text-2xl font-light">
                 &quot;{affirmation}&quot;
               </p>
             )}
           </CardContent>
         </Card>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+
+        {/* Stats Card */}
+        <Card className="col-span-3 lg:col-span-1 transition-shadow hover:shadow-lg">
           <CardHeader>
-            <CardTitle className="font-headline text-xl">Mood Overview</CardTitle>
-            <CardDescription>
-              Your mood trends over the last 7 days.
-            </CardDescription>
+            <CardTitle className="font-headline text-xl">Your Stats</CardTitle>
+            <CardDescription>A summary of your recent activity.</CardDescription>
           </CardHeader>
-          <CardContent className="pl-2">
-            {loadingData ? <Skeleton className="h-[350px] w-full" /> : <MoodHistoryChart data={chartData} />}
-          </CardContent>
-        </Card>
-        <Card className="col-span-4 lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">Quick Access</CardTitle>
-            <CardDescription>
-              Jump right into an activity.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {quickAccessItems.map(item => (
-              <Link href={item.href} key={item.title}>
-                <div className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted transition-colors">
-                  <div className={`p-2 bg-muted rounded-lg`}>
-                    <item.icon className={`h-6 w-6 ${item.color}`} />
-                  </div>
-                  <div className="grid gap-1">
-                    <p className="text-sm font-medium leading-none">
-                      {item.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div className="ml-auto font-medium"><ArrowUpRight className="h-4 w-4 text-muted-foreground" /></div>
-                </div>
-              </Link>
-            ))}
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Journal Streak</span>
+              </div>
+              <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : `${journalStreak} days`}</div>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Check-ins</span>
+              </div>
+              <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : checkInCount}</div>
+            </div>
+             <Separator />
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-3">
+                <HeartPulse className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Overall Mood</span>
+              </div>
+              <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-20" /> : overallMood.text}</div>
+            </div>
           </CardContent>
         </Card>
       </div>
-    </>
+      
+      {/* Mood Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline text-xl">Mood Overview</CardTitle>
+          <CardDescription>Your mood and stress trends from the last 7 check-ins.</CardDescription>
+        </CardHeader>
+        <CardContent className="pl-2">
+           {loadingData ? <Skeleton className="h-[350px] w-full" /> : <MoodHistoryChart data={chartData} />}
+        </CardContent>
+      </Card>
+
+      {/* Quick Access Activities */}
+      <div>
+        <h2 className="text-xl md:text-2xl font-bold font-headline mb-4">Start an Activity</h2>
+        <div className="grid gap-6 md:grid-cols-3">
+          {quickAccessItems.map((item) => (
+             <Link key={item.title} href={item.href} className="flex">
+                <Card className="w-full transition-shadow hover:shadow-lg hover:border-primary/50">
+                    <CardHeader>
+                        <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-full ${item.color}`}>
+                                <item.icon className={`h-6 w-6 ${item.iconColor}`} />
+                            </div>
+                            <div>
+                                <CardTitle className="font-headline text-lg">{item.title}</CardTitle>
+                                <CardDescription>{item.description}</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
