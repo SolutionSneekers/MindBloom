@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense } from 'react';
@@ -183,14 +184,21 @@ function SelfCareActivitiesContent() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, index) => (
-                <Card key={index} className="flex flex-col">
+                <Card key={index}>
                     <CardHeader>
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
+                        <div className="flex items-center justify-between">
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-6 w-16" />
+                        </div>
                     </CardHeader>
-                    <CardContent className="flex-grow">
-                        <Skeleton className="h-4 w-full mb-2" />
-                        <Skeleton className="h-4 w-5/6" />
+                    <CardContent>
+                        <div className="flex items-start gap-4">
+                            <Skeleton className="h-8 w-8 rounded-full" />
+                            <div className="space-y-2 flex-1">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-5/6" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             ))}

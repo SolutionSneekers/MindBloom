@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, FormEvent, useCallback, useMemo } from "react";
@@ -222,11 +223,43 @@ export default function MoodHistoryPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-             <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
-                ))}
-             </div>
+             <div className="w-full overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="hidden md:table-cell">Date</TableHead>
+                      <TableHead>Mood</TableHead>
+                      <TableHead className="text-center">Stress</TableHead>
+                      <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(5)].map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="hidden md:table-cell">
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Skeleton className="h-5 w-16" />
+                            <Skeleton className="h-3 w-20 md:hidden" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-4 w-4 mx-auto" />
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Skeleton className="h-4 w-full max-w-xs" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-8 w-8 ml-auto" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
           ) : (
             <>
               <div className="w-full overflow-x-auto">
