@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { valueToMood, moodEmojis } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface MoodChartData {
     name: string; // date e.g., 'Jul 20'
@@ -38,6 +39,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 
 export default function MoodHistoryChart({ data }: { data: MoodChartData[] }) {
+  const isMobile = useIsMobile();
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[350px] text-muted-foreground">
@@ -65,10 +68,12 @@ export default function MoodHistoryChart({ data }: { data: MoodChartData[] }) {
           domain={[0, 7]}
           ticks={[1,2,3,4,5,6]}
         />
-        <Tooltip
-          cursor={{ fill: 'hsl(var(--accent))', opacity: 0.2 }}
-          content={<CustomTooltip />}
-        />
+        {!isMobile && (
+          <Tooltip
+            cursor={{ fill: 'hsl(var(--accent))', opacity: 0.2 }}
+            content={<CustomTooltip />}
+          />
+        )}
         <Bar dataKey="mood" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
