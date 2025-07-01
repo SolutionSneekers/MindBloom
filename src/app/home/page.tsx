@@ -264,7 +264,10 @@ export default function HomePage() {
           </CardHeader>
           <CardContent>
             {loadingAffirmation ? (
-              <Skeleton className="h-6 w-3/4 bg-primary-foreground/20" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full bg-primary-foreground/20" />
+                <Skeleton className="h-8 w-3/4 bg-primary-foreground/20" />
+              </div>
             ) : (
               <p className="text-2xl font-light">
                 &quot;{affirmation}&quot;
@@ -280,32 +283,65 @@ export default function HomePage() {
             <CardDescription>A summary of your recent activity.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">Journal Streak</span>
-              </div>
-              <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : `${journalStreak} days`}</div>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    <div className="flex flex-col">
-                        <span className="font-medium leading-none">Mood Check-ins</span>
-                        <span className="text-xs text-muted-foreground">(last 30 days)</span>
+            {loadingData ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="h-5 w-32" />
                     </div>
-                </div>
-                <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-12" /> : checkInCount}</div>
-            </div>
-             <Separator />
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-3">
-                <HeartPulse className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">Overall Mood</span>
-              </div>
-              <div className="text-lg font-bold">{loadingData ? <Skeleton className="h-6 w-20" /> : overallMood.text}</div>
-            </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <div className="space-y-1">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-12" />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="h-5 w-24" />
+                    </div>
+                    <Skeleton className="h-6 w-20" />
+                  </div>
+                </>
+            ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">Journal Streak</span>
+                    </div>
+                    <div className="text-lg font-bold">{`${journalStreak} days`}</div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                          <Calendar className="h-5 w-5 text-muted-foreground" />
+                          <div className="flex flex-col">
+                              <span className="font-medium leading-none">Mood Check-ins</span>
+                              <span className="text-xs text-muted-foreground">(last 30 days)</span>
+                          </div>
+                      </div>
+                      <div className="text-lg font-bold">{checkInCount}</div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <HeartPulse className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">Overall Mood</span>
+                    </div>
+                    <div className="text-lg font-bold">{overallMood.text}</div>
+                  </div>
+                </>
+            )}
           </CardContent>
         </Card>
       </div>
