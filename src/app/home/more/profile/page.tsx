@@ -304,7 +304,7 @@ export default function ProfilePage() {
                             </DialogTrigger>
                         </div>
                         <p className="text-sm text-muted-foreground text-center sm:text-left">
-                            Click the pencil to choose a default avatar, or provide a URL below. <br />
+                            Click the pencil to choose a new avatar or provide a custom image URL. <br />
                             Avatars sync with Google if you signed in with that provider.
                         </p>
                     </div>
@@ -341,13 +341,7 @@ export default function ProfilePage() {
                       />
                       {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="photoURL">Photo URL</Label>
-                      <Input id="photoURL" placeholder="https://example.com/image.png" {...register('photoURL')} disabled={isSaving} />
-                      {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
-                    </div>
-
+                    
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
                       <Input id="email" type="email" value={user.email || ''} disabled autoComplete="email" />
@@ -364,23 +358,38 @@ export default function ProfilePage() {
               </CollapsibleContent>
             </Card>
         </Collapsible>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-                <DialogTitle>Choose a Default Avatar</DialogTitle>
+                <DialogTitle>Choose Your Avatar</DialogTitle>
                 <DialogDescription>
-                    Select one of the avatars below to set it as your profile picture.
+                    Select one of the default avatars or provide a URL to an image.
                 </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-3 gap-4 py-4">
-                {defaultAvatars.map((avatarSvg, index) => (
-                    <button
-                        key={index}
-                        type="button"
-                        className="p-2 border-2 border-transparent rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all"
-                        onClick={() => handleAvatarSelect(avatarSvg)}
-                        dangerouslySetInnerHTML={{ __html: avatarSvg }}
-                    />
-                ))}
+            <div className="py-4 space-y-6">
+                <div className="grid grid-cols-4 gap-4">
+                    {defaultAvatars.map((avatarSvg, index) => (
+                        <button
+                            key={index}
+                            type="button"
+                            className="p-2 border-2 border-transparent rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all"
+                            onClick={() => handleAvatarSelect(avatarSvg)}
+                            dangerouslySetInnerHTML={{ __html: avatarSvg }}
+                        />
+                    ))}
+                </div>
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Or</span>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="photoURL-dialog">Photo URL</Label>
+                    <Input id="photoURL-dialog" placeholder="https://example.com/image.png" {...register('photoURL')} />
+                    {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
+                </div>
             </div>
         </DialogContent>
       </Dialog>
