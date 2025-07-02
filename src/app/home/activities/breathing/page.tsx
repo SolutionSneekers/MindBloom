@@ -155,9 +155,9 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
   const getScaleClassForPhase = (phaseName: BreathingPhase['name']) => {
     switch (phaseName) {
       case 'Inhale':
-        return 'scale-110';
+        return 'scale-125';
       case 'Hold':
-        return 'scale-110';
+        return 'scale-125';
       case 'Exhale':
         return 'scale-100';
       case 'Pause':
