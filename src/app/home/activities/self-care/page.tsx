@@ -193,7 +193,7 @@ function SelfCareActivitiesContent() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-4">
-                            <Skeleton className="h-8 w-8 rounded-full" />
+                            <Skeleton className="h-8 w-8" />
                             <div className="space-y-2 flex-1">
                                 <Skeleton className="h-4 w-full" />
                                 <Skeleton className="h-4 w-5/6" />
@@ -240,24 +240,40 @@ function SelfCareActivitiesContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activities.map((activity, index) => {
               const Icon = categoryIcons[activity.category] || Heart;
+              const cardContent = (
+                <>
+                  <CardHeader>
+                      <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-headline">{activity.title}</CardTitle>
+                          <Badge variant="outline">{activity.category}</Badge>
+                      </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                      <div className="flex items-start gap-4">
+                          <Icon className="h-8 w-8 text-primary mt-1" />
+                          <p className="text-muted-foreground">{activity.description}</p>
+                      </div>
+                  </CardContent>
+                </>
+              );
+
+              if (activity.category === 'Breathing') {
+                return (
+                  <Link key={index} href="/home/activities/breathing" className="flex">
+                    <Card className="flex flex-col w-full hover:shadow-lg transition-shadow duration-300">
+                      {cardContent}
+                    </Card>
+                  </Link>
+                );
+              }
+
               return (
                   <Card 
                     key={index} 
                     className="flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                     onClick={() => handleCardClick(activity)}
                   >
-                      <CardHeader>
-                          <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg font-headline">{activity.title}</CardTitle>
-                              <Badge variant="outline">{activity.category}</Badge>
-                          </div>
-                      </CardHeader>
-                      <CardContent className="flex-grow">
-                          <div className="flex items-start gap-4">
-                              <Icon className="h-8 w-8 text-primary mt-1" />
-                              <p className="text-muted-foreground">{activity.description}</p>
-                          </div>
-                      </CardContent>
+                    {cardContent}
                   </Card>
               )
           })}

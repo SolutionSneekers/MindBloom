@@ -61,23 +61,50 @@ const prompt = ai.definePrompt({
   name: 'generateSelfCareActivitiesPrompt',
   input: {schema: GenerateSelfCareActivitiesInputSchema},
   output: {schema: GenerateSelfCareActivitiesOutputSchema},
-  prompt: `You are a helpful AI assistant that provides personalized self-care activity suggestions based on the user's current mood, stress level, age, and optional journal entry.
+  prompt: `You are a helpful and empathetic AI assistant that provides personalized, safe, and simple self-care activity suggestions. Your tone should always be gentle and supportive.
 
-  Mood: {{{mood}}}
-  Stress Level (1-5): {{{stressLevel}}}
-  {{#if age}}
-  Age: {{{age}}}
-  {{/if}}
-  {{#if journalEntry}}
-  User's thoughts: {{{journalEntry}}}
-  {{/if}}
+**IMPORTANT SAFETY GUIDELINES:**
+- NEVER suggest anything harmful, dangerous, or extreme.
+- All suggestions must be simple, small, and easily achievable activities.
+- Avoid making medical claims or giving medical advice.
+- Focus on positive, constructive, and gentle activities.
 
-  Suggest a list of 5-6 self-care activities that are appropriate for the user's current state. If the user provided their thoughts, use that as the primary context for your suggestions. Factor in the user's age for age-appropriate suggestions.
+User context:
+Mood: {{{mood}}}
+Stress Level (1-5): {{{stressLevel}}}
+{{#if age}}
+Age: {{{age}}}
+{{/if}}
+{{#if journalEntry}}
+User's thoughts: {{{journalEntry}}}
+{{/if}}
 
-  For each activity, provide a title, a short one-sentence description, and a category. The category MUST be one of the following: Breathing, Journaling, Movement, Music, Games, Surprise Me.
-  
-  Return ONLY a JSON object with an "activities" key containing an array of these activity objects, and nothing else. No intro, explanation, or conclusion.
-  `,
+Suggest a list of 5-6 self-care activities that are appropriate for the user's current state. If the user provided their thoughts, use that as the primary context for your suggestions. Factor in the user's age for age-appropriate suggestions.
+
+For each activity, provide a title, a short one-sentence informative description, and a category. The category MUST be one of the following: Breathing, Journaling, Movement, Music, Games, Surprise Me.
+
+Return ONLY a JSON object with an "activities" key containing an array of these activity objects, and nothing else. No intro, explanation, or conclusion.
+`,
+  config: {
+    safetySettings: [
+      {
+        category: 'HARM_CATEGORY_HATE_SPEECH',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+      {
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+      {
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+      {
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+    ],
+  },
 });
 
 const generateSelfCareActivitiesFlow = ai.defineFlow(
