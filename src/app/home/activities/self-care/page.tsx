@@ -16,7 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, orderBy, limit, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { calculateAge, cn } from '@/lib/utils';
+import { calculateAge } from '@/lib/utils';
 import Link from 'next/link';
 
 type Activity = GenerateSelfCareActivitiesOutput['activities'][0];
@@ -240,20 +240,12 @@ function SelfCareActivitiesContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activities.map((activity, index) => {
           const Icon = categoryIcons[activity.category] || Heart;
-          const isBreathingActivity = activity.category === 'Breathing';
 
           return (
             <Card
               key={index}
-              className={cn(
-                'flex flex-col hover:shadow-lg transition-shadow duration-300',
-                !isBreathingActivity && 'cursor-pointer'
-              )}
-              onClick={
-                !isBreathingActivity
-                  ? () => handleCardClick(activity)
-                  : undefined
-              }
+              className="flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+              onClick={() => handleCardClick(activity)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -266,20 +258,9 @@ function SelfCareActivitiesContent() {
               <CardContent className="flex-grow">
                 <div className="flex items-start gap-4">
                   <Icon className="h-8 w-8 text-primary mt-1" />
-                  {isBreathingActivity ? (
-                    <p className="text-muted-foreground">
-                      <Link
-                        href="/home/activities/breathing"
-                        className="hover:underline"
-                      >
-                        {activity.description}
-                      </Link>
-                    </p>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      {activity.description}
-                    </p>
-                  )}
+                  <p className="text-muted-foreground">
+                    {activity.description}
+                  </p>
                 </div>
               </CardContent>
             </Card>
