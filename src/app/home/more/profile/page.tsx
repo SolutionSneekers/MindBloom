@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { DatePickerDialog } from '@/components/ui/date-picker-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { defaultAvatars } from '@/lib/avatars';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
@@ -135,11 +136,8 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, [reset]);
   
-  const handleAvatarSelect = (svg: string) => {
-    if (typeof window !== 'undefined') {
-        const dataUri = `data:image/svg+xml;base64,${window.btoa(svg)}`;
-        setDialogPhotoSelection(dataUri);
-    }
+  const handleAvatarSelect = (dataUri: string) => {
+    setDialogPhotoSelection(dataUri);
   };
 
   const handleRevertToOriginal = () => {
@@ -380,58 +378,60 @@ export default function ProfilePage() {
               </CollapsibleContent>
             </Card>
         </Collapsible>
-        <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
+        <DialogContent className="sm:max-w-lg p-0">
+            <DialogHeader className="p-6 pb-4">
                 <DialogTitle>Choose Your Avatar</DialogTitle>
                 <DialogDescription>
                     Select a default avatar or provide a URL. Click OK to apply your choice.
                 </DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-6">
-                <div className="grid grid-cols-4 gap-4">
-                    {defaultAvatars.map((avatarSvg, index) => {
-                      const dataUri = `data:image/svg+xml;base64,${typeof window !== 'undefined' ? window.btoa(avatarSvg) : ''}`;
-                      return (
-                        <button
-                            key={index}
-                            type="button"
-                            className={cn(
-                                "p-2 border-2 rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all",
-                                dataUri === dialogPhotoSelection ? "border-primary" : "border-transparent"
-                            )}
-                            onClick={() => handleAvatarSelect(avatarSvg)}
-                            dangerouslySetInnerHTML={{ __html: avatarSvg }}
-                        />
-                      )
-                    })}
-                </div>
-                
-                {originalPhotoURL && (
-                    <Button variant="outline" className="w-full" onClick={handleRevertToOriginal}>
-                        Revert to Original Photo
-                    </Button>
-                )}
+            <ScrollArea className="max-h-[60vh] border-y">
+              <div className="px-6 py-4 space-y-6">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-4">
+                      {defaultAvatars.map((avatarSvg, index) => {
+                        const dataUri = `data:image/svg+xml;base64,${typeof window !== 'undefined' ? window.btoa(avatarSvg) : ''}`;
+                        return (
+                          <button
+                              key={index}
+                              type="button"
+                              className={cn(
+                                  "p-1 border-2 rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all",
+                                  dataUri === dialogPhotoSelection ? "border-primary bg-accent" : "border-transparent"
+                              )}
+                              onClick={() => handleAvatarSelect(dataUri)}
+                              dangerouslySetInnerHTML={{ __html: avatarSvg }}
+                          />
+                        )
+                      })}
+                  </div>
+                  
+                  {originalPhotoURL && (
+                      <Button variant="outline" className="w-full" onClick={handleRevertToOriginal}>
+                          Revert to Original Photo
+                      </Button>
+                  )}
 
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">Or</span>
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="photoURL-dialog">Photo URL</Label>
-                     <Input
-                        id="photoURL-dialog"
-                        placeholder="https://example.com/image.png"
-                        value={(dialogPhotoSelection || '').startsWith('data:image/svg+xml') ? '' : dialogPhotoSelection || ''}
-                        onChange={(e) => setDialogPhotoSelection(e.target.value)}
-                    />
-                    {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
-                </div>
-            </div>
-            <DialogFooter>
+                  <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">Or</span>
+                      </div>
+                  </div>
+                  <div className="space-y-2">
+                      <Label htmlFor="photoURL-dialog">Photo URL</Label>
+                       <Input
+                          id="photoURL-dialog"
+                          placeholder="https://example.com/image.png"
+                          value={(dialogPhotoSelection || '').startsWith('data:image/svg+xml') ? '' : dialogPhotoSelection || ''}
+                          onChange={(e) => setDialogPhotoSelection(e.target.value)}
+                      />
+                      {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
+                  </div>
+              </div>
+            </ScrollArea>
+            <DialogFooter className="p-6 pt-4">
                 <Button type="button" variant="ghost" onClick={() => setIsAvatarDialogOpen(false)}>Cancel</Button>
                 <Button type="button" onClick={handleApplyAvatar}>OK</Button>
             </DialogFooter>
