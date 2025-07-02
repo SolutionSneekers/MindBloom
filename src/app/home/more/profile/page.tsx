@@ -48,6 +48,7 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 export default function ProfilePage() {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
+  const [originalPhotoURL, setOriginalPhotoURL] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
@@ -101,6 +102,7 @@ export default function ProfilePage() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        setOriginalPhotoURL(currentUser.photoURL);
         const nameParts = currentUser.displayName?.split(' ') || ['', ''];
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
@@ -137,6 +139,10 @@ export default function ProfilePage() {
     }
   };
 
+  const handleRevertToOriginal = () => {
+    setValue('photoURL', originalPhotoURL || '', { shouldDirty: true, shouldValidate: true });
+    setIsAvatarDialogOpen(false);
+  };
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!auth.currentUser) return;
@@ -377,6 +383,13 @@ export default function ProfilePage() {
                         />
                     ))}
                 </div>
+                
+                {originalPhotoURL && (
+                    <Button variant="outline" className="w-full" onClick={handleRevertToOriginal}>
+                        Revert to Original Photo
+                    </Button>
+                )}
+
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />
