@@ -22,7 +22,7 @@ import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Pencil
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { DatePickerDialog } from '@/components/ui/date-picker-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { defaultAvatars } from '@/lib/avatars';
 
 const profileSchema = z.object({
@@ -58,7 +58,11 @@ export default function ProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { handleLogout } = useLogout();
+  
+  // State for the avatar dialog
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [dialogPhotoSelection, setDialogPhotoSelection] = useState('');
+
 
   const {
     register,
@@ -134,14 +138,25 @@ export default function ProfilePage() {
   const handleAvatarSelect = (svg: string) => {
     if (typeof window !== 'undefined') {
         const dataUri = `data:image/svg+xml;base64,${window.btoa(svg)}`;
-        setValue('photoURL', dataUri, { shouldDirty: true, shouldValidate: true });
-        setIsAvatarDialogOpen(false);
+        setDialogPhotoSelection(dataUri);
     }
   };
 
   const handleRevertToOriginal = () => {
-    setValue('photoURL', originalPhotoURL || '', { shouldDirty: true, shouldValidate: true });
+    setDialogPhotoSelection(originalPhotoURL || '');
+  };
+
+  const handleApplyAvatar = () => {
+    setValue('photoURL', dialogPhotoSelection, { shouldDirty: true, shouldValidate: true });
     setIsAvatarDialogOpen(false);
+  };
+  
+  const handleAvatarDialogOpenChange = (open: boolean) => {
+    if (open) {
+      // When dialog opens, initialize its state with the current form value
+      setDialogPhotoSelection(watch('photoURL') || '');
+    }
+    setIsAvatarDialogOpen(open);
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
@@ -165,6 +180,7 @@ export default function ProfilePage() {
 
 
       setUser(auth.currentUser);
+      setOriginalPhotoURL(auth.currentUser.photoURL);
       toast({
         title: 'Profile updated!',
         description: 'Your changes have been saved successfully.',
@@ -276,7 +292,7 @@ export default function ProfilePage() {
         <p className="text-muted-foreground">Manage your personal details and account information.</p>
       </div>
       
-      <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+      <Dialog open={isAvatarDialogOpen} onOpenChange={handleAvatarDialogOpenChange}>
         <Collapsible open={isCollapsibleOpen} onOpenChange={setIsCollapsibleOpen}>
             <Card className="transition-shadow hover:shadow-md">
                 <CollapsibleTrigger className="w-full text-left">
@@ -368,20 +384,26 @@ export default function ProfilePage() {
             <DialogHeader>
                 <DialogTitle>Choose Your Avatar</DialogTitle>
                 <DialogDescription>
-                    Select one of the default avatars or provide a URL to an image.
+                    Select a default avatar or provide a URL. Click OK to apply your choice.
                 </DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-6">
                 <div className="grid grid-cols-4 gap-4">
-                    {defaultAvatars.map((avatarSvg, index) => (
+                    {defaultAvatars.map((avatarSvg, index) => {
+                      const dataUri = `data:image/svg+xml;base64,${typeof window !== 'undefined' ? window.btoa(avatarSvg) : ''}`;
+                      return (
                         <button
                             key={index}
                             type="button"
-                            className="p-2 border-2 border-transparent rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all"
+                            className={cn(
+                                "p-2 border-2 rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all",
+                                dataUri === dialogPhotoSelection ? "border-primary" : "border-transparent"
+                            )}
                             onClick={() => handleAvatarSelect(avatarSvg)}
                             dangerouslySetInnerHTML={{ __html: avatarSvg }}
                         />
-                    ))}
+                      )
+                    })}
                 </div>
                 
                 {originalPhotoURL && (
@@ -400,25 +422,19 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="photoURL-dialog">Photo URL</Label>
-                    <Controller
-                        name="photoURL"
-                        control={control}
-                        render={({ field }) => {
-                            const isDataUri = typeof field.value === 'string' && field.value.startsWith('data:image/svg+xml');
-                            return (
-                            <Input
-                                id="photoURL-dialog"
-                                placeholder="https://example.com/image.png"
-                                {...field}
-                                value={isDataUri ? '' : field.value || ''}
-                                onChange={(e) => field.onChange(e.target.value)}
-                            />
-                            );
-                        }}
+                     <Input
+                        id="photoURL-dialog"
+                        placeholder="https://example.com/image.png"
+                        value={(dialogPhotoSelection || '').startsWith('data:image/svg+xml') ? '' : dialogPhotoSelection || ''}
+                        onChange={(e) => setDialogPhotoSelection(e.target.value)}
                     />
                     {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
                 </div>
             </div>
+            <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setIsAvatarDialogOpen(false)}>Cancel</Button>
+                <Button type="button" onClick={handleApplyAvatar}>OK</Button>
+            </DialogFooter>
         </DialogContent>
       </Dialog>
       
@@ -505,3 +521,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
