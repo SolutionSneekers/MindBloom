@@ -405,12 +405,6 @@ export default function ProfilePage() {
                       })}
                   </div>
                   
-                  {originalPhotoURL && (
-                      <Button variant="outline" className="w-full" onClick={handleRevertToOriginal}>
-                          Revert to Original Photo
-                      </Button>
-                  )}
-
                   <div className="relative">
                       <div className="absolute inset-0 flex items-center">
                           <span className="w-full border-t" />
@@ -432,6 +426,11 @@ export default function ProfilePage() {
               </div>
             </ScrollArea>
             <DialogFooter className="p-6 pt-4">
+                {originalPhotoURL && (
+                    <Button type="button" variant="outline" onClick={handleRevertToOriginal} className="mr-auto">
+                        Revert to Original Photo
+                    </Button>
+                )}
                 <Button type="button" variant="ghost" onClick={() => setIsAvatarDialogOpen(false)}>Cancel</Button>
                 <Button type="button" onClick={handleApplyAvatar}>OK</Button>
             </DialogFooter>
@@ -521,7 +520,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
-
-    
