@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -425,18 +424,8 @@ export default function ProfilePage() {
                   </div>
               </div>
             </ScrollArea>
-            <DialogFooter className="p-6 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-              {originalPhotoURL && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleRevertToOriginal}
-                  className="w-full sm:w-auto"
-                >
-                  Revert to Original
-                </Button>
-              )}
-              <div className="flex w-full sm:w-auto justify-end gap-2 ml-auto">
+            <DialogFooter className="p-6 pt-4 flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <div className="w-full sm:order-2 flex sm:w-auto justify-end gap-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -453,6 +442,16 @@ export default function ProfilePage() {
                   OK
                 </Button>
               </div>
+              {originalPhotoURL && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRevertToOriginal}
+                  className="w-full sm:w-auto sm:order-1"
+                >
+                  Revert to Original
+                </Button>
+              )}
             </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -540,5 +539,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
