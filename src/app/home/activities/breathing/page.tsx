@@ -230,7 +230,11 @@ export default function BreathingExercisePage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 h-auto">
             {exercises.map(ex => (
-                <TabsTrigger key={ex.id} value={ex.id} className="whitespace-normal h-full py-2">
+                <TabsTrigger 
+                    key={ex.id} 
+                    value={ex.id} 
+                    className="whitespace-normal h-full py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
                     {ex.name}
                 </TabsTrigger>
             ))}
