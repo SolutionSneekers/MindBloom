@@ -181,7 +181,7 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
       <div className="relative flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64">
         <div
           className={cn(
-            'absolute bg-accent/30 rounded-full transition-transform ease-in-out',
+            'absolute bg-accent/30 rounded-full transition-transform ease-linear',
             isAnimating && circleSizeClass
           )}
           style={{
