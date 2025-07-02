@@ -18,10 +18,12 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon } from 'lucide-react';
+import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Pencil } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { DatePickerDialog } from '@/components/ui/date-picker-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { defaultAvatars } from '@/lib/avatars';
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }).max(50),
@@ -55,6 +57,7 @@ export default function ProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { handleLogout } = useLogout();
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
 
   const {
     register,
@@ -62,6 +65,7 @@ export default function ProfilePage() {
     reset,
     watch,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -124,6 +128,15 @@ export default function ProfilePage() {
 
     return () => unsubscribe();
   }, [reset]);
+  
+  const handleAvatarSelect = (svg: string) => {
+    if (typeof window !== 'undefined') {
+        const dataUri = `data:image/svg+xml;base64,${window.btoa(svg)}`;
+        setValue('photoURL', dataUri, { shouldDirty: true, shouldValidate: true });
+        setIsAvatarDialogOpen(false);
+    }
+  };
+
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!auth.currentUser) return;
@@ -257,86 +270,120 @@ export default function ProfilePage() {
         <p className="text-muted-foreground">Manage your personal details and account information.</p>
       </div>
       
-      <Collapsible open={isCollapsibleOpen} onOpenChange={setIsCollapsibleOpen}>
-        <Card className="transition-shadow hover:shadow-md">
-            <CollapsibleTrigger className="w-full text-left">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-headline flex items-center gap-2"><UserIcon /> Edit Profile</CardTitle>
-                  <CardDescription>Click to expand and edit your profile details.</CardDescription>
-                </div>
-                  <ChevronsUpDown className={cn("h-5 w-5 transition-transform duration-300", isCollapsibleOpen && "rotate-180")} />
-              </CardHeader>
-            </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <Avatar className="h-20 w-20 border">
-                      <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
-                      <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <p className="text-sm text-muted-foreground text-center sm:text-left">
-                        Your avatar is based on the Photo URL you provide. <br />
-                        It will also sync with your Google account photo if you signed in with Google.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name <span className="text-destructive">*</span></Label>
-                        <Input id="firstName" {...register('firstName')} disabled={isSaving} autoComplete="given-name" />
-                        {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
+      <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+        <Collapsible open={isCollapsibleOpen} onOpenChange={setIsCollapsibleOpen}>
+            <Card className="transition-shadow hover:shadow-md">
+                <CollapsibleTrigger className="w-full text-left">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-headline flex items-center gap-2"><UserIcon /> Edit Profile</CardTitle>
+                      <CardDescription>Click to expand and edit your profile details.</CardDescription>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name <span className="text-destructive">*</span></Label>
-                        <Input id="lastName" {...register('lastName')} disabled={isSaving} autoComplete="family-name" />
-                        {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
+                      <ChevronsUpDown className={cn("h-5 w-5 transition-transform duration-300", isCollapsibleOpen && "rotate-180")} />
+                  </CardHeader>
+                </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-6">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                        <div className="relative group">
+                            <Avatar className="h-20 w-20 border">
+                              <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
+                              <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                            </Avatar>
+                            <DialogTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="absolute -bottom-1 -right-1 rounded-full h-8 w-8 bg-background group-hover:bg-muted"
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Change avatar</span>
+                                </Button>
+                            </DialogTrigger>
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center sm:text-left">
+                            Click the pencil to choose a default avatar, or provide a URL below. <br />
+                            Avatars sync with Google if you signed in with that provider.
+                        </p>
                     </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label>Date of Birth</Label>
-                   <Controller
-                    control={control}
-                    name="dob"
-                    render={({ field }) => (
-                       <DatePickerDialog
-                        value={field.value}
-                        onChange={field.onChange}
-                        fromYear={new Date().getFullYear() - 120}
-                        toYear={new Date().getFullYear()}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="firstName">First Name <span className="text-destructive">*</span></Label>
+                            <Input id="firstName" {...register('firstName')} disabled={isSaving} autoComplete="given-name" />
+                            {errors.firstName && <p className="text-sm text-destructive">{errors.firstName.message}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="lastName">Last Name <span className="text-destructive">*</span></Label>
+                            <Input id="lastName" {...register('lastName')} disabled={isSaving} autoComplete="family-name" />
+                            {errors.lastName && <p className="text-sm text-destructive">{errors.lastName.message}</p>}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Date of Birth</Label>
+                       <Controller
+                        control={control}
+                        name="dob"
+                        render={({ field }) => (
+                           <DatePickerDialog
+                            value={field.value}
+                            onChange={field.onChange}
+                            fromYear={new Date().getFullYear() - 120}
+                            toYear={new Date().getFullYear()}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                          />
+                        )}
                       />
-                    )}
-                  />
-                  {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
-                </div>
+                      {errors.dob && <p className="text-sm text-destructive">{errors.dob.message}</p>}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="photoURL">Photo URL</Label>
-                  <Input id="photoURL" placeholder="https://example.com/image.png" {...register('photoURL')} disabled={isSaving} />
-                  {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="photoURL">Photo URL</Label>
+                      <Input id="photoURL" placeholder="https://example.com/image.png" {...register('photoURL')} disabled={isSaving} />
+                      {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={user.email || ''} disabled autoComplete="email" />
-                   <p className="text-sm text-muted-foreground">You cannot change your email address here.</p>
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" value={user.email || ''} disabled autoComplete="email" />
+                       <p className="text-sm text-muted-foreground">You cannot change your email address here.</p>
+                    </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={isSaving}>
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+        </Collapsible>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Choose a Default Avatar</DialogTitle>
+                <DialogDescription>
+                    Select one of the avatars below to set it as your profile picture.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-3 gap-4 py-4">
+                {defaultAvatars.map((avatarSvg, index) => (
+                    <button
+                        key={index}
+                        type="button"
+                        className="p-2 border-2 border-transparent rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all"
+                        onClick={() => handleAvatarSelect(avatarSvg)}
+                        dangerouslySetInnerHTML={{ __html: avatarSvg }}
+                    />
+                ))}
+            </div>
+        </DialogContent>
+      </Dialog>
       
       <Collapsible open={isPasswordCollapsibleOpen} onOpenChange={(isOpen) => {
         setIsPasswordCollapsibleOpen(isOpen);
