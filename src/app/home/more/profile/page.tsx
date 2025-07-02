@@ -425,7 +425,7 @@ export default function ProfilePage() {
                   </div>
               </div>
             </ScrollArea>
-            <DialogFooter className="p-6 pt-4 flex-col-reverse sm:flex-row sm:justify-between items-center gap-2">
+            <DialogFooter className="p-6 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               {originalPhotoURL && (
                 <Button
                   type="button"
@@ -540,3 +540,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
