@@ -395,7 +395,7 @@ export default function ProfilePage() {
                               key={index}
                               type="button"
                               className={cn(
-                                  "p-1 border-2 rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all",
+                                  "w-full aspect-square flex items-center justify-center p-1 border-2 rounded-full hover:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all [&_svg]:h-full [&_svg]:w-full",
                                   dataUri === dialogPhotoSelection ? "border-primary bg-accent" : "border-transparent"
                               )}
                               onClick={() => handleAvatarSelect(dataUri)}
