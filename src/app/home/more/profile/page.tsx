@@ -387,7 +387,22 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="photoURL-dialog">Photo URL</Label>
-                    <Input id="photoURL-dialog" placeholder="https://example.com/image.png" {...register('photoURL')} />
+                    <Controller
+                        name="photoURL"
+                        control={control}
+                        render={({ field }) => {
+                            const isDataUri = typeof field.value === 'string' && field.value.startsWith('data:image/svg+xml');
+                            return (
+                            <Input
+                                id="photoURL-dialog"
+                                placeholder="https://example.com/image.png"
+                                {...field}
+                                value={isDataUri ? '' : field.value || ''}
+                                onChange={(e) => field.onChange(e.target.value)}
+                            />
+                            );
+                        }}
+                    />
                     {errors.photoURL && <p className="text-sm text-destructive">{errors.photoURL.message}</p>}
                 </div>
             </div>
