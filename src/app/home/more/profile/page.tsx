@@ -425,14 +425,34 @@ export default function ProfilePage() {
                   </div>
               </div>
             </ScrollArea>
-            <DialogFooter className="p-6 pt-4">
-                {originalPhotoURL && (
-                    <Button type="button" variant="outline" onClick={handleRevertToOriginal} className="mr-auto">
-                        Revert to Original Photo
-                    </Button>
-                )}
-                <Button type="button" variant="ghost" onClick={() => setIsAvatarDialogOpen(false)}>Cancel</Button>
-                <Button type="button" onClick={handleApplyAvatar}>OK</Button>
+            <DialogFooter className="p-6 pt-4 flex-col-reverse sm:flex-row sm:justify-between items-center gap-2">
+              {originalPhotoURL && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRevertToOriginal}
+                  className="w-full sm:w-auto"
+                >
+                  Revert to Original
+                </Button>
+              )}
+              <div className="flex w-full sm:w-auto justify-end gap-2 ml-auto">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsAvatarDialogOpen(false)}
+                  className="flex-grow sm:flex-grow-0"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleApplyAvatar}
+                  className="flex-grow sm:flex-grow-0"
+                >
+                  OK
+                </Button>
+              </div>
             </DialogFooter>
         </DialogContent>
       </Dialog>
