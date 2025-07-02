@@ -29,6 +29,7 @@ interface JournalEntry {
 }
 
 const moods = ['Happy', 'Calm', 'Okay', 'Sad', 'Anxious', 'Angry'];
+const TRUNCATE_LENGTH = 250;
 
 export default function JournalPage() {
   const { toast } = useToast();
@@ -45,6 +46,7 @@ export default function JournalPage() {
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [isLoadingEntries, setIsLoadingEntries] = useState(true);
   const [showAllEntries, setShowAllEntries] = useState(false);
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   // State for dialogs
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -249,6 +251,18 @@ export default function JournalPage() {
     }
   }, [selectedEntry, toast, fetchJournalEntries]);
 
+  const toggleEntryExpansion = (entryId: string) => {
+    setExpandedEntries(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(entryId)) {
+        newSet.delete(entryId);
+      } else {
+        newSet.add(entryId);
+      }
+      return newSet;
+    });
+  };
+
   const displayedEntries = showAllEntries ? pastEntries : pastEntries.slice(0, 7);
 
   return (
@@ -347,7 +361,12 @@ export default function JournalPage() {
             </div>
           ) : pastEntries.length > 0 ? (
             <>
-              {displayedEntries.map((entry) => (
+              {displayedEntries.map((entry) => {
+                 const isExpanded = expandedEntries.has(entry.id);
+                 const isLongEntry = entry.entry.length > TRUNCATE_LENGTH;
+                 const truncatedEntry = isLongEntry ? `${entry.entry.substring(0, TRUNCATE_LENGTH)}...` : entry.entry;
+
+                return (
                 <Card key={entry.id} className="p-4 transition-shadow hover:shadow-md">
                    <div className="flex justify-between items-start">
                       <div>
@@ -373,9 +392,21 @@ export default function JournalPage() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                  <p className="text-muted-foreground mt-4 whitespace-pre-wrap">{entry.entry}</p>
+                  <div className="text-muted-foreground mt-4 whitespace-pre-wrap">
+                    <p>{isExpanded ? entry.entry : truncatedEntry}</p>
+                    {isLongEntry && (
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto mt-2 text-primary text-sm"
+                        onClick={() => toggleEntryExpansion(entry.id)}
+                      >
+                        {isExpanded ? 'Show less' : 'Read more'}
+                      </Button>
+                    )}
+                  </div>
                 </Card>
-              ))}
+                )
+              })}
               {pastEntries.length > 7 && (
                 <div className="mt-6 flex justify-center">
                   <Button variant="outline" onClick={() => setShowAllEntries(!showAllEntries)}>
