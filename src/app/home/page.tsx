@@ -365,7 +365,7 @@ export default function HomePage() {
              <Link key={item.title} href={item.href} className="flex">
                 <Card className="w-full transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
                     <CardHeader>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-start gap-4">
                             <div className={`p-3 rounded-full ${item.color}`}>
                                 <item.icon className={`h-6 w-6 ${item.iconColor}`} />
                             </div>

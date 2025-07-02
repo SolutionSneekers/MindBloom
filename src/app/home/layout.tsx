@@ -141,19 +141,14 @@ export default function HomeLayout({
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col w-[260px]">
                  <SheetHeader>
-                   <SheetTitle>
-                     <Link
-                      href="/home"
-                      className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Logo />
-                       <span className="sr-only">MindBloom Home</span>
-                    </Link>
-                   </SheetTitle>
-                   <SheetDescription className="sr-only">
-                     A list of navigation links to browse the application.
-                   </SheetDescription>
+                   <Link
+                    href="/home"
+                    className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Logo />
+                     <span className="sr-only">MindBloom Home</span>
+                  </Link>
                 </SheetHeader>
                 <NavLinks onLinkClick={() => setIsMobileMenuOpen(false)} />
               </SheetContent>
