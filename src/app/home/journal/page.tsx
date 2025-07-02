@@ -307,119 +307,125 @@ export default function JournalPage() {
         </CardContent>
       </Card>
       
-      <Card className="transition-shadow hover:shadow-md">
-        <CardHeader>
-          <CardTitle className="font-headline text-xl">New Entry</CardTitle>
-           <CardDescription>
-            {currentDate}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-2">
-            <Label htmlFor="new-journal-entry">Your thoughts <span className="text-destructive">*</span></Label>
-            <Textarea
-              id="new-journal-entry"
-              placeholder="Start writing here..."
-              className="min-h-[200px] text-base"
-              value={journalEntry}
-              onChange={(e) => setJournalEntry(e.target.value)}
-              disabled={isSaving}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-           <Button onClick={saveToFirestore} disabled={!journalEntry || isSaving}>
-            <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save Entry'}
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <Card className="transition-shadow hover:shadow-md">
-        <CardHeader>
-          <CardTitle className="font-headline text-xl">Past Entries</CardTitle>
-          <CardDescription>Review and manage your previous journal entries.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isLoadingEntries ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                      <Skeleton className="h-5 w-32" />
-                      <Skeleton className="h-4 w-48" />
-                    </div>
-                    <Skeleton className="h-8 w-8" />
-                  </div>
-                  <div className="space-y-2 mt-4">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : pastEntries.length > 0 ? (
-            <>
-              {displayedEntries.map((entry) => {
-                 const isExpanded = expandedEntries.has(entry.id);
-                 const isLongEntry = entry.entry.length > TRUNCATE_LENGTH;
-                 const truncatedEntry = isLongEntry ? `${entry.entry.substring(0, TRUNCATE_LENGTH)}...` : entry.entry;
-
-                return (
-                <Card key={entry.id} className="p-4 transition-shadow hover:shadow-md">
-                   <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold">{entry.createdAt}</p>
-                        {entry.prompt && <p className="text-sm text-muted-foreground italic mt-1">&quot;{entry.prompt}&quot;</p>}
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  <div className="text-muted-foreground mt-4 whitespace-pre-wrap">
-                    <p>{isExpanded ? entry.entry : truncatedEntry}</p>
-                    {isLongEntry && (
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto mt-2 text-primary text-sm"
-                        onClick={() => toggleEntryExpansion(entry.id)}
-                      >
-                        {isExpanded ? 'Show less' : 'Read more'}
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-                )
-              })}
-              {pastEntries.length > 7 && (
-                <div className="mt-6 flex justify-center">
-                  <Button variant="outline" onClick={() => setShowAllEntries(!showAllEntries)}>
-                    {showAllEntries ? 'Show Less' : `Show All (${pastEntries.length}) Entries`}
-                  </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+        <div className="lg:col-span-2">
+            <Card className="transition-shadow hover:shadow-md">
+                <CardHeader>
+                <CardTitle className="font-headline text-xl">New Entry</CardTitle>
+                <CardDescription>
+                    {currentDate}
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                <div className="grid gap-2">
+                    <Label htmlFor="new-journal-entry">Your thoughts <span className="text-destructive">*</span></Label>
+                    <Textarea
+                    id="new-journal-entry"
+                    placeholder="Start writing here..."
+                    className="min-h-[200px] text-base"
+                    value={journalEntry}
+                    onChange={(e) => setJournalEntry(e.target.value)}
+                    disabled={isSaving}
+                    />
                 </div>
-              )}
-            </>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">You have no past journal entries.</p>
-          )}
-        </CardContent>
-      </Card>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                <Button onClick={saveToFirestore} disabled={!journalEntry || isSaving}>
+                    <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save Entry'}
+                </Button>
+                </CardFooter>
+            </Card>
+        </div>
+        <div className="lg:col-span-3">
+            <Card className="transition-shadow hover:shadow-md">
+                <CardHeader>
+                <CardTitle className="font-headline text-xl">Past Entries</CardTitle>
+                <CardDescription>Review and manage your previous journal entries.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                {isLoadingEntries ? (
+                    <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                        <Card key={i} className="p-4">
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-2">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-4 w-48" />
+                            </div>
+                            <Skeleton className="h-8 w-8" />
+                        </div>
+                        <div className="space-y-2 mt-4">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
+                        </Card>
+                    ))}
+                    </div>
+                ) : pastEntries.length > 0 ? (
+                    <>
+                    {displayedEntries.map((entry) => {
+                        const isExpanded = expandedEntries.has(entry.id);
+                        const isLongEntry = entry.entry.length > TRUNCATE_LENGTH;
+                        const truncatedEntry = isLongEntry ? `${entry.entry.substring(0, TRUNCATE_LENGTH)}...` : entry.entry;
+
+                        return (
+                        <Card key={entry.id} className="p-4 transition-shadow hover:shadow-md">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="font-semibold">{entry.createdAt}</p>
+                                {entry.prompt && <p className="text-sm text-muted-foreground italic mt-1">&quot;{entry.prompt}&quot;</p>}
+                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>Delete</span>
+                                </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            </div>
+                        <div className="text-muted-foreground mt-4 whitespace-pre-wrap">
+                            <p>{isExpanded ? entry.entry : truncatedEntry}</p>
+                            {isLongEntry && (
+                            <Button
+                                variant="link"
+                                className="p-0 h-auto mt-2 text-primary text-sm"
+                                onClick={() => toggleEntryExpansion(entry.id)}
+                            >
+                                {isExpanded ? 'Show less' : 'Read more'}
+                            </Button>
+                            )}
+                        </div>
+                        </Card>
+                        )
+                    })}
+                    {pastEntries.length > 7 && (
+                        <div className="mt-6 flex justify-center">
+                        <Button variant="outline" onClick={() => setShowAllEntries(!showAllEntries)}>
+                            {showAllEntries ? 'Show Less' : `Show All (${pastEntries.length}) Entries`}
+                        </Button>
+                        </div>
+                    )}
+                    </>
+                ) : (
+                    <p className="text-center text-muted-foreground py-8">You have no past journal entries.</p>
+                )}
+                </CardContent>
+            </Card>
+        </div>
+      </div>
+
       
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={(open) => {

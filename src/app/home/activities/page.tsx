@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -31,7 +32,7 @@ export default function ActivitiesPage() {
             <div className="grid gap-6 md:grid-cols-2">
                 {activityPages.map((page) => (
                      <Link key={page.title} href={page.href} className="flex">
-                        <Card className="flex flex-col w-full transition-shadow hover:shadow-lg hover:border-primary/50">
+                        <Card className="flex flex-col w-full transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
                             <CardHeader>
                                 <div className="flex items-start justify-between">
                                     <div>
