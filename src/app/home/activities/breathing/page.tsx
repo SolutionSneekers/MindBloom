@@ -151,7 +151,20 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
   }, [isAnimating, countdown, phaseIndex, phases]);
 
   const currentPhase = phases[phaseIndex];
-  const circleSizeClass = currentPhase.name === 'Inhale' ? 'scale-110' : 'scale-100';
+  
+  const getScaleClassForPhase = (phaseName: BreathingPhase['name']) => {
+    switch (phaseName) {
+      case 'Inhale':
+      case 'Hold':
+        return 'scale-110';
+      case 'Exhale':
+      case 'Pause':
+        return 'scale-100';
+      default:
+        return 'scale-100';
+    }
+  };
+  const circleSizeClass = getScaleClassForPhase(currentPhase.name);
 
   const handleStartPause = () => {
     setIsAnimating(!isAnimating);
@@ -168,7 +181,7 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
       <div className="relative flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64">
         <div
           className={cn(
-            'absolute bg-accent/30 rounded-full transition-transform duration-[4000ms] ease-in-out',
+            'absolute bg-accent/30 rounded-full transition-transform ease-in-out',
             isAnimating && circleSizeClass
           )}
           style={{
