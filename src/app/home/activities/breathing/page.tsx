@@ -155,9 +155,11 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
   const getScaleClassForPhase = (phaseName: BreathingPhase['name']) => {
     switch (phaseName) {
       case 'Inhale':
+        return 'scale-110';
       case 'Hold':
         return 'scale-110';
       case 'Exhale':
+        return 'scale-100';
       case 'Pause':
         return 'scale-100';
       default:
@@ -178,7 +180,7 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
   
   return (
     <div className="flex flex-col items-center justify-center pt-4">
-      <div className="relative flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64">
+      <div className="relative flex items-center justify-center w-48 h-48 sm:w-56 sm:h-56">
         <div
           className={cn(
             'absolute bg-accent/30 rounded-full transition-transform ease-linear',
@@ -191,7 +193,7 @@ const Animator = ({ exercise }: { exercise: BreathingExerciseInfo }) => {
           }}
         />
         <div className="relative z-10 text-center">
-          <p className="text-4xl font-bold text-primary sm:text-5xl">{countdown}</p>
+          <p className="text-3xl font-bold text-primary sm:text-4xl">{countdown}</p>
           <p className="text-lg font-medium text-muted-foreground">{currentPhase.instruction}</p>
         </div>
       </div>
