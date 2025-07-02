@@ -26,4 +26,13 @@ export const defaultAvatars: string[] = [
 
   // Avatar 9: Minimalist geometric
   `<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="40" fill="hsl(240 100% 99%)" stroke="hsl(240 5.9% 85%)" stroke-width="2"/><rect x="20" y="20" width="40" height="40" rx="5" fill="hsl(180 100% 25.1%)" transform="rotate(45 40 40)"/><rect x="25" y="25" width="30" height="30" rx="5" fill="hsl(183.1 100% 74.3%)" transform="rotate(45 40 40)"/></svg>`,
+  
+  // Avatar 10: Concentric Circles
+  `<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="40" fill="hsl(240 4.8% 95.9%)"/><circle cx="40" cy="40" r="30" stroke="hsl(180 100% 25.1%)" stroke-width="4"/><circle cx="40" cy="40" r="20" stroke="hsl(183.1 100% 74.3%)" stroke-width="4"/><circle cx="40" cy="40" r="10" fill="hsl(180 100% 25.1%)"/></svg>`,
+
+  // Avatar 11: Puzzle Piece
+  `<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="40" fill="hsl(183.1 100% 74.3%)"/><path d="M30 25 C30 15, 25 15, 25 25 S30 35, 40 35 V45 H55 C65 45, 65 40, 55 40 S45 45, 45 55" fill="hsl(180 100% 25.1%)" /></svg>`,
+
+  // Avatar 12: Plus Pattern
+  `<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="40" fill="hsl(240 4.8% 95.9%)"/><path d="M20 37 H43 V20 M43 37 V60 M43 37 H60" stroke="hsl(180 100% 25.1%)" stroke-width="6" stroke-linecap="round"/></svg>`,
 ];
