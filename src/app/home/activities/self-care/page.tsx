@@ -16,7 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, orderBy, limit, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, cn } from '@/lib/utils';
 import Link from 'next/link';
 
 type Activity = GenerateSelfCareActivitiesOutput['activities'][0];
@@ -238,45 +238,53 @@ function SelfCareActivitiesContent() {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {activities.map((activity, index) => {
-              const Icon = categoryIcons[activity.category] || Heart;
-              const cardContent = (
-                <>
-                  <CardHeader>
-                      <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg font-headline">{activity.title}</CardTitle>
-                          <Badge variant="outline">{activity.category}</Badge>
-                      </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                      <div className="flex items-start gap-4">
-                          <Icon className="h-8 w-8 text-primary mt-1" />
-                          <p className="text-muted-foreground">{activity.description}</p>
-                      </div>
-                  </CardContent>
-                </>
-              );
+        {activities.map((activity, index) => {
+          const Icon = categoryIcons[activity.category] || Heart;
+          const isBreathingActivity = activity.category === 'Breathing';
 
-              if (activity.category === 'Breathing') {
-                return (
-                  <Link key={index} href="/home/activities/breathing" className="flex">
-                    <Card className="flex flex-col w-full hover:shadow-lg transition-shadow duration-300">
-                      {cardContent}
-                    </Card>
-                  </Link>
-                );
+          return (
+            <Card
+              key={index}
+              className={cn(
+                'flex flex-col hover:shadow-lg transition-shadow duration-300',
+                !isBreathingActivity && 'cursor-pointer'
+              )}
+              onClick={
+                !isBreathingActivity
+                  ? () => handleCardClick(activity)
+                  : undefined
               }
-
-              return (
-                  <Card 
-                    key={index} 
-                    className="flex flex-col hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                    onClick={() => handleCardClick(activity)}
-                  >
-                    {cardContent}
-                  </Card>
-              )
-          })}
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-headline">
+                    {activity.title}
+                  </CardTitle>
+                  <Badge variant="outline">{activity.category}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <div className="flex items-start gap-4">
+                  <Icon className="h-8 w-8 text-primary mt-1" />
+                  {isBreathingActivity ? (
+                    <p className="text-muted-foreground">
+                      <Link
+                        href="/home/activities/breathing"
+                        className="hover:underline"
+                      >
+                        {activity.description}
+                      </Link>
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      {activity.description}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
