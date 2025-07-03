@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from "next/link"
@@ -65,7 +64,7 @@ export default function RegisterPage() {
         title: "Account created!",
         description: "A verification link has been sent to your email address.",
       })
-      router.push("/home")
+      router.push("/verify-email")
     } catch (error: any) {
       toast({
         title: "Uh oh! Something went wrong.",

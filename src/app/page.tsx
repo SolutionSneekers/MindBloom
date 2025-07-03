@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth"
 import { auth, db } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Eye, EyeOff } from "lucide-react"
@@ -33,7 +33,22 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user;
+
+      // Check if the user's email is verified
+      if (user && !user.emailVerified) {
+        await signOut(auth); // Sign out the user
+        toast({
+          title: "Verification Required",
+          description: "Please verify your email address before logging in. You can request a new link via the 'Forgot Password' page.",
+          variant: "destructive",
+          duration: 9000,
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       router.push("/home")
     } catch (error: any) {
       toast({
@@ -41,7 +56,6 @@ export default function LoginPage() {
         description: "The email or password you entered is incorrect. Please try again.",
         variant: "destructive",
       })
-    } finally {
       setIsLoading(false)
     }
   }
@@ -78,7 +92,6 @@ export default function LoginPage() {
         description: "An error occurred during Google sign-in. Please try again.",
         variant: "destructive",
       })
-    } finally {
       setIsLoading(false)
     }
   }
