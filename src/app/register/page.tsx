@@ -1,9 +1,10 @@
+
 'use client'
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth"
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, sendEmailVerification } from "firebase/auth"
 import { auth, db } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Eye, EyeOff } from "lucide-react"
@@ -45,6 +46,9 @@ export default function RegisterPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user;
+      
+      await sendEmailVerification(user);
+      
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`.trim()
       })
@@ -59,7 +63,7 @@ export default function RegisterPage() {
 
       toast({
         title: "Account created!",
-        description: "You have been successfully signed up.",
+        description: "A verification link has been sent to your email address.",
       })
       router.push("/home")
     } catch (error: any) {
