@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from 'next/link';
@@ -141,6 +140,8 @@ export default function HomeLayout({
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col w-[260px]">
                  <SheetHeader>
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                  <SheetDescription className="sr-only">Main navigation links for the application.</SheetDescription>
                    <Link
                     href="/home"
                     className="flex items-center gap-2 font-semibold border-b pb-4 mb-4"
