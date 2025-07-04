@@ -48,7 +48,7 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 export default function ProfilePage() {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
-  const [originalPhotoURL, setOriginalPhotoURL] = useState<string | null>(null);
+  const [providerPhotoURL, setProviderPhotoURL] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
@@ -106,7 +106,6 @@ export default function ProfilePage() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setOriginalPhotoURL(currentUser.photoURL);
         const nameParts = currentUser.displayName?.split(' ') || ['', ''];
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
@@ -119,6 +118,11 @@ export default function ProfilePage() {
           const userData = userDocSnap.data();
           if (userData.dob && userData.dob instanceof Timestamp) {
             dob = userData.dob.toDate();
+          }
+          if (userData.providerPhotoURL) {
+            setProviderPhotoURL(userData.providerPhotoURL);
+          } else {
+            setProviderPhotoURL(null);
           }
         }
         
@@ -140,7 +144,7 @@ export default function ProfilePage() {
   };
 
   const handleRevertToOriginal = () => {
-    setDialogPhotoSelection(originalPhotoURL || '');
+    setDialogPhotoSelection(providerPhotoURL || '');
   };
 
   const handleApplyAvatar = () => {
@@ -177,7 +181,6 @@ export default function ProfilePage() {
 
 
       setUser(auth.currentUser);
-      setOriginalPhotoURL(auth.currentUser.photoURL);
       toast({
         title: 'Profile updated!',
         description: 'Your changes have been saved successfully.',
@@ -442,7 +445,7 @@ export default function ProfilePage() {
                   OK
                 </Button>
               </div>
-              {originalPhotoURL && (
+              {providerPhotoURL && (
                 <Button
                   type="button"
                   variant="outline"
