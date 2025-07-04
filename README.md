@@ -105,8 +105,8 @@ src/
 1. **Clone the repository**
 
 ```bash
-git clone <repository-url>
-cd mindbloom
+git clone https://github.com/SolutionSneeker/MindBloom.git
+cd MindBloom
 ```
 
 2. **Install dependencies**
