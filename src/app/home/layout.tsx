@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   BookOpen,
   Home,
+  Info,
   LogOut,
   Menu,
   MoreHorizontal,
@@ -190,6 +191,12 @@ export default function HomeLayout({
                 <Link href="/home/more/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/home/more/about">
+                  <Info className="mr-2 h-4 w-4" />
+                  About Us
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
