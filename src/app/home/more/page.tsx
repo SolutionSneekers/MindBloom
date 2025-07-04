@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { User, Settings } from 'lucide-react';
+import { User, Settings, Info } from 'lucide-react';
 
 const morePages = [
     {
@@ -17,6 +17,12 @@ const morePages = [
         description: "Customize your application preferences, like theme.",
         href: "/home/more/settings",
         icon: Settings,
+    },
+    {
+        title: "About Us",
+        description: "Learn more about our mission and the team.",
+        href: "/home/more/about",
+        icon: Info,
     }
 ];
 
@@ -29,7 +35,7 @@ export default function MorePage() {
                     Manage your profile, settings, and other application preferences.
                 </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {morePages.map((page) => (
                     <Link key={page.title} href={page.href} className="flex">
                         <Card className="flex flex-col w-full transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
