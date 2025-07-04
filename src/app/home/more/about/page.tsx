@@ -1,8 +1,31 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Users, Target, Eye } from 'lucide-react';
+import { Users, Target, Eye, Heart, Brain, Shield, Lightbulb } from 'lucide-react';
 import { Logo } from '@/components/icons';
+
+const principles = [
+  {
+    icon: Heart,
+    title: "Personalized Guidance",
+    description: "Leveraging AI to provide tailored mood analysis, journaling prompts, and self-care activities that resonate with your current state."
+  },
+  {
+    icon: Brain,
+    title: "Mindful Tools",
+    description: "Offering a suite of features including guided breathing exercises, mood tracking, and a private journal to encourage daily self-reflection."
+  },
+  {
+    icon: Shield,
+    title: "A Safe & Private Space",
+    description: "Ensuring your data is private and your experience is non-judgmental, creating a secure environment for you to explore your feelings."
+  },
+  {
+    icon: Lightbulb,
+    title: "Built for Growth",
+    description: "Designing an intuitive and easy-to-use application that makes mental wellness support accessible whenever you need it."
+  }
+];
 
 export default function AboutUsPage() {
   return (
@@ -43,6 +66,28 @@ export default function AboutUsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl font-headline">Our Core Principles</CardTitle>
+          <CardDescription>These values guide every feature we build.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-6">
+            {principles.map((principle) => (
+              <li key={principle.title} className="flex items-start gap-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <principle.icon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{principle.title}</h3>
+                  <p className="text-muted-foreground">{principle.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
       
       <Card>
           <CardHeader>
