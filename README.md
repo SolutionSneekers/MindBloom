@@ -344,6 +344,8 @@ We appreciate your contributions to making MindBloom better!
 
 - [Aaditya Kumar](https://github.com/AadityaGeek/)
 - [Priyewrat](https://github.com/priyewrat/)
+- [Gyandeep Raj](https://github.com/Gyandeepraj/)
+- [Ruchi Kumari](https://github.com/Ruchi337/)
 
 
 ## 📄 License
