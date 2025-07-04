@@ -97,6 +97,7 @@ export default function RegisterPage() {
           lastName,
           email: user.email,
           photoURL: user.photoURL,
+          providerPhotoURL: user.photoURL,
           createdAt: serverTimestamp()
         });
       }
