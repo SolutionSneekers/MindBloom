@@ -48,7 +48,7 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 export default function ProfilePage() {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
-  const [providerPhotoURL, setProviderPhotoURL] = useState<string | null>(null);
+  const [lastUsedPhotoURL, setLastUsedPhotoURL] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
@@ -119,10 +119,10 @@ export default function ProfilePage() {
           if (userData.dob && userData.dob instanceof Timestamp) {
             dob = userData.dob.toDate();
           }
-          if (userData.providerPhotoURL) {
-            setProviderPhotoURL(userData.providerPhotoURL);
+          if (userData.lastUsedPhotoURL) {
+            setLastUsedPhotoURL(userData.lastUsedPhotoURL);
           } else {
-            setProviderPhotoURL(null);
+            setLastUsedPhotoURL(null);
           }
         }
         
@@ -143,8 +143,10 @@ export default function ProfilePage() {
     setDialogPhotoSelection(dataUri);
   };
 
-  const handleRevertToOriginal = () => {
-    setDialogPhotoSelection(providerPhotoURL || '');
+  const handleRevertToLastURL = () => {
+    if (lastUsedPhotoURL) {
+      setDialogPhotoSelection(lastUsedPhotoURL);
+    }
   };
 
   const handleApplyAvatar = () => {
@@ -165,19 +167,31 @@ export default function ProfilePage() {
     
     setIsSaving(true);
     try {
+      const oldPhotoURL = auth.currentUser.photoURL;
+      const newPhotoURL = data.photoURL;
+
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      const firestoreUpdates: any = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        photoURL: newPhotoURL,
+        dob: data.dob ? Timestamp.fromDate(data.dob) : null,
+      };
+
+      // If the old photo was a real URL and the new one is a default SVG,
+      // save the old one as the last used URL.
+      if (oldPhotoURL && oldPhotoURL.startsWith('http') && newPhotoURL && newPhotoURL.startsWith('data:image')) {
+        firestoreUpdates.lastUsedPhotoURL = oldPhotoURL;
+        setLastUsedPhotoURL(oldPhotoURL); // Update client state immediately
+      }
+
       await updateProfile(auth.currentUser, {
         displayName: `${data.firstName} ${data.lastName}`.trim(),
         photoURL: data.photoURL,
       });
 
       // Save/update user data in Firestore
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      await setDoc(userDocRef, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        photoURL: data.photoURL,
-        dob: data.dob ? Timestamp.fromDate(data.dob) : null,
-      }, { merge: true });
+      await setDoc(userDocRef, firestoreUpdates, { merge: true });
 
 
       setUser(auth.currentUser);
@@ -445,14 +459,14 @@ export default function ProfilePage() {
                   OK
                 </Button>
               </div>
-              {providerPhotoURL && (
+              {lastUsedPhotoURL && (
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleRevertToOriginal}
+                  onClick={handleRevertToLastURL}
                   className="w-full sm:w-auto sm:order-1"
                 >
-                  Revert to Original
+                  Revert to Last URL
                 </Button>
               )}
             </DialogFooter>
