@@ -341,4 +341,5 @@ Potential improvements for future versions:
 
 ---
 
+
 *This documentation is intended for developers and contributors to the MindBloom project. For user documentation, please refer to the application's help section.*
