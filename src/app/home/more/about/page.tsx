@@ -108,7 +108,7 @@ export default function AboutUsPage() {
             <p className="text-muted-foreground text-center max-w-md">
                 Your feedback is valuable to us. Please don&apos;t hesitate to reach out to our team for any assistance or to share your thoughts.
             </p>
-            <a href="mailto:support@mindbloom.app">
+            <a href="mailto:solutionsneekers@gmail.com">
                 <Button>Contact Support</Button>
             </a>
           </CardContent>
