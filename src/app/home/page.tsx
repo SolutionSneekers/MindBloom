@@ -128,11 +128,12 @@ export default function HomePage() {
           setOverallMood({ text: 'No data', trend: 'N/A' });
         }
 
-        // Fetch journal data for streak
+        // Fetch journal data for streak, optimized to fetch only last 365 entries
         const journalQuery = query(
             collection(db, "journalEntries"),
             where("userId", "==", auth.currentUser.uid),
-            orderBy("createdAt", "desc")
+            orderBy("createdAt", "desc"),
+            limit(365) // Optimization: Limit to a year's worth of entries
         );
         const journalSnapshot = await getDocs(journalQuery);
         const entries = journalSnapshot.docs.map(doc => {

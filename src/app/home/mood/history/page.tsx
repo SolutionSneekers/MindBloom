@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { moodToValue, moods } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -29,38 +29,52 @@ interface MoodHistoryEntry {
   journalEntry: string;
 }
 
+const INITIAL_LOAD_COUNT = 7;
+
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<MoodHistoryEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
-  const [showAll, setShowAll] = useState(false);
 
   const [editMood, setEditMood] = useState('');
   const [editStressLevel, setEditStressLevel] = useState([3]);
   const [editJournalEntry, setEditJournalEntry] = useState('');
 
-  const fetchMoodHistory = useCallback(async () => {
+  const fetchMoodHistory = useCallback(async (loadAll = false) => {
     if (!auth.currentUser) {
       setLoading(false);
       setMoodHistoryData([]);
       return;
     }
-    setLoading(true);
+    
+    if (loadAll) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+    
     try {
-      const q = query(
+      let q = query(
         collection(db, "moods"),
         where("userId", "==", auth.currentUser.uid),
         orderBy("createdAt", "desc")
       );
+
+      if (!loadAll) {
+        q = query(q, limit(INITIAL_LOAD_COUNT));
+      }
+      
       const querySnapshot = await getDocs(q);
       
       const history: MoodHistoryEntry[] = [];
-      
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.createdAt) {
@@ -75,8 +89,15 @@ export default function MoodHistoryPage() {
           });
         }
       });
-
+      
       setMoodHistoryData(history);
+
+      if (!loadAll) {
+        setHasMore(history.length === INITIAL_LOAD_COUNT);
+      } else {
+        setHasMore(false);
+      }
+
     } catch (error) {
       console.error("Error fetching mood history:", error);
        toast({
@@ -86,6 +107,7 @@ export default function MoodHistoryPage() {
       });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, [toast]);
 
@@ -142,7 +164,7 @@ export default function MoodHistoryPage() {
     setIsDeleting(true);
     try {
       await deleteDoc(doc(db, "moods", selectedEntry.id));
-      await fetchMoodHistory();
+      setMoodHistoryData(prev => prev.filter(e => e.id !== selectedEntry.id));
       toast({
         title: "Success",
         description: "Mood entry deleted.",
@@ -159,7 +181,7 @@ export default function MoodHistoryPage() {
       setIsDeleteDialogOpen(false);
       setSelectedEntry(null);
     }
-  }, [selectedEntry, fetchMoodHistory, toast]);
+  }, [selectedEntry, toast]);
 
   const handleUpdateEntry = useCallback(async (e: FormEvent) => {
     e.preventDefault();
@@ -172,7 +194,7 @@ export default function MoodHistoryPage() {
         stressLevel: editStressLevel[0],
         journalEntry: editJournalEntry,
       });
-      await fetchMoodHistory();
+      await fetchMoodHistory(!hasMore);
       toast({
         title: "Success",
         description: "Mood entry updated.",
@@ -189,10 +211,8 @@ export default function MoodHistoryPage() {
       setIsEditDialogOpen(false);
       setSelectedEntry(null);
     }
-  }, [selectedEntry, editMood, editStressLevel, editJournalEntry, fetchMoodHistory, toast]);
-
-  const displayedEntries = showAll ? moodHistoryData : moodHistoryData.slice(0, 7);
-
+  }, [selectedEntry, editMood, editStressLevel, editJournalEntry, fetchMoodHistory, toast, hasMore]);
+  
   return (
     <div className="space-y-6">
       <div>
@@ -274,7 +294,7 @@ export default function MoodHistoryPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {displayedEntries.length > 0 ? displayedEntries.map((entry) => {
+                    {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => {
                       const displayDate = new Date(entry.date).toLocaleDateString();
                       return (
                       <TableRow key={entry.id}>
@@ -329,10 +349,11 @@ export default function MoodHistoryPage() {
                   </TableBody>
                 </Table>
               </div>
-              {moodHistoryData.length > 7 && (
+              {hasMore && (
                 <div className="mt-6 flex justify-center">
-                  <Button variant="outline" onClick={() => setShowAll(!showAll)}>
-                    {showAll ? 'Show Less' : `Show All (${moodHistoryData.length}) Entries`}
+                  <Button variant="outline" onClick={() => fetchMoodHistory(true)} disabled={loadingMore}>
+                    {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {loadingMore ? 'Loading...' : 'Show All Entries'}
                   </Button>
                 </div>
               )}

@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, FormEvent } from 'react';
 import { generateJournalingPrompts } from '@/ai/flows/generate-journaling-prompts';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc, limit } from 'firebase/firestore';
 import { calculateAge } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Save, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { RefreshCw, Save, MoreHorizontal, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -30,6 +30,8 @@ interface JournalEntry {
 
 const moods = ['Happy', 'Calm', 'Okay', 'Sad', 'Anxious', 'Angry'];
 const TRUNCATE_LENGTH = 250;
+const INITIAL_LOAD_COUNT = 5;
+
 
 export default function JournalPage() {
   const { toast } = useToast();
@@ -45,7 +47,8 @@ export default function JournalPage() {
   // State for past entries
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [isLoadingEntries, setIsLoadingEntries] = useState(true);
-  const [showAllEntries, setShowAllEntries] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   // State for dialogs
@@ -55,23 +58,30 @@ export default function JournalPage() {
   const [editEntryText, setEditEntryText] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    setCurrentDate(new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
-  }, []);
-
-  const fetchJournalEntries = useCallback(async () => {
+  
+  const fetchJournalEntries = useCallback(async (loadAll = false) => {
     if (!auth.currentUser) {
       setIsLoadingEntries(false);
       return;
     }
-    setIsLoadingEntries(true);
+
+    if (loadAll) {
+      setLoadingMore(true);
+    } else {
+      setIsLoadingEntries(true);
+    }
+
     try {
-      const q = query(
+      let q = query(
         collection(db, "journalEntries"),
         where("userId", "==", auth.currentUser.uid),
         orderBy("createdAt", "desc")
       );
+
+      if (!loadAll) {
+        q = query(q, limit(INITIAL_LOAD_COUNT));
+      }
+
       const querySnapshot = await getDocs(q);
       const entries: JournalEntry[] = [];
       querySnapshot.forEach((doc) => {
@@ -89,6 +99,11 @@ export default function JournalPage() {
         }
       });
       setPastEntries(entries);
+      if (!loadAll) {
+        setHasMore(entries.length === INITIAL_LOAD_COUNT);
+      } else {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error("Error fetching journal entries:", error);
       toast({
@@ -98,9 +113,15 @@ export default function JournalPage() {
       });
     } finally {
       setIsLoadingEntries(false);
+      setLoadingMore(false);
     }
   }, [toast]);
 
+
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+  }, []);
+  
   const fetchUserAge = useCallback(async () => {
     if (auth.currentUser) {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
@@ -208,7 +229,7 @@ export default function JournalPage() {
       await updateDoc(entryRef, {
         entry: editEntryText,
       });
-      await fetchJournalEntries();
+      setPastEntries(prev => prev.map(e => e.id === selectedEntry.id ? {...e, entry: editEntryText} : e));
       toast({
         title: "Success",
         description: "Journal entry updated.",
@@ -225,14 +246,14 @@ export default function JournalPage() {
       setIsEditDialogOpen(false);
       setSelectedEntry(null);
     }
-  }, [selectedEntry, editEntryText, toast, fetchJournalEntries]);
+  }, [selectedEntry, editEntryText, toast]);
 
   const handleDeleteEntry = useCallback(async () => {
     if (!selectedEntry || !auth.currentUser) return;
     setIsDeleting(true);
     try {
       await deleteDoc(doc(db, "journalEntries", selectedEntry.id));
-      await fetchJournalEntries();
+      setPastEntries(prev => prev.filter(e => e.id !== selectedEntry.id));
       toast({
         title: "Success",
         description: "Journal entry deleted.",
@@ -249,7 +270,7 @@ export default function JournalPage() {
       setIsDeleteDialogOpen(false);
       setSelectedEntry(null);
     }
-  }, [selectedEntry, toast, fetchJournalEntries]);
+  }, [selectedEntry, toast]);
 
   const toggleEntryExpansion = (entryId: string) => {
     setExpandedEntries(prev => {
@@ -262,8 +283,6 @@ export default function JournalPage() {
       return newSet;
     });
   };
-
-  const displayedEntries = showAllEntries ? pastEntries : pastEntries.slice(0, 7);
 
   return (
     <div className="space-y-6">
@@ -364,7 +383,7 @@ export default function JournalPage() {
                     </div>
                 ) : pastEntries.length > 0 ? (
                     <>
-                    {displayedEntries.map((entry) => {
+                    {pastEntries.map((entry) => {
                         const isExpanded = expandedEntries.has(entry.id);
                         const isLongEntry = entry.entry.length > TRUNCATE_LENGTH;
                         const truncatedEntry = isLongEntry ? `${entry.entry.substring(0, TRUNCATE_LENGTH)}...` : entry.entry;
@@ -410,10 +429,11 @@ export default function JournalPage() {
                         </Card>
                         )
                     })}
-                    {pastEntries.length > 7 && (
+                    {hasMore && (
                         <div className="mt-6 flex justify-center">
-                        <Button variant="outline" onClick={() => setShowAllEntries(!showAllEntries)}>
-                            {showAllEntries ? 'Show Less' : `Show All (${pastEntries.length}) Entries`}
+                        <Button variant="outline" onClick={() => fetchJournalEntries(true)} disabled={loadingMore}>
+                             {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                             {loadingMore ? 'Loading...' : 'Show All Entries'}
                         </Button>
                         </div>
                     )}
