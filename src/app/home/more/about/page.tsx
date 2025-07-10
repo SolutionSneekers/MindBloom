@@ -113,7 +113,7 @@ export default function AboutUsPage() {
               <a href="mailto:solutionsneekers@gmail.com">
                   <Button>Contact Support</Button>
               </a>
-               <a href="https://github.com/SolutionSneeker/MindBloom" target="_blank" rel="noopener noreferrer">
+               <a href="https://github.com/SolutionSneekers/MindBloom" target="_blank" rel="noopener noreferrer">
                   <Button variant="outline">
                     <Github className="mr-2 h-4 w-4" />
                     View on GitHub
