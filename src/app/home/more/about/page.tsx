@@ -1,7 +1,8 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Target, Eye, Heart, Brain, Shield, Lightbulb, LifeBuoy } from 'lucide-react';
+import { Target, Eye, Heart, Brain, Shield, Lightbulb, LifeBuoy, Github } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 
@@ -108,9 +109,17 @@ export default function AboutUsPage() {
             <p className="text-muted-foreground text-center max-w-md">
                 Your feedback is valuable to us. Please don&apos;t hesitate to reach out to our team for any assistance or to share your thoughts.
             </p>
-            <a href="mailto:solutionsneekers@gmail.com">
-                <Button>Contact Support</Button>
-            </a>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a href="mailto:solutionsneekers@gmail.com">
+                  <Button>Contact Support</Button>
+              </a>
+               <a href="https://github.com/SolutionSneeker/MindBloom" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline">
+                    <Github className="mr-2 h-4 w-4" />
+                    View on GitHub
+                  </Button>
+              </a>
+            </div>
           </CardContent>
         </Card>
     </div>
