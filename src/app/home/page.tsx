@@ -6,6 +6,8 @@ import { useEffect, useState } from "react"
 import {
   BookOpen,
   Calendar,
+  Check,
+  Copy,
   HeartPulse,
   Smile,
   Sparkles,
@@ -16,6 +18,7 @@ import { auth, db } from "@/lib/firebase"
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import { generateDailyAffirmation } from "@/ai/flows/generate-daily-affirmation"
+import { useToast } from "@/hooks/use-toast"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -66,6 +69,18 @@ export default function HomePage() {
   const [affirmation, setAffirmation] = useState('');
   const [loadingAffirmation, setLoadingAffirmation] = useState(true);
   const [overallMood, setOverallMood] = useState({ text: 'No data', trend: 'N/A' });
+  const [isCopied, setIsCopied] = useState(false);
+  const { toast } = useToast();
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(affirmation);
+    setIsCopied(true);
+    toast({
+      title: "Copied to clipboard!",
+      description: "Your daily affirmation is ready to be shared.",
+    });
+    setTimeout(() => setIsCopied(false), 2000); // Revert icon after 2 seconds
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -133,7 +148,7 @@ export default function HomePage() {
             collection(db, "journalEntries"),
             where("userId", "==", auth.currentUser.uid),
             orderBy("createdAt", "desc"),
-            limit(365) // Optimization: Limit to a year's worth of entries
+            limit(INITIAL_LOAD_COUNT * 5) // Optimization: Load more than strict streak for better calc
         );
         const journalSnapshot = await getDocs(journalQuery);
         const entries = journalSnapshot.docs.map(doc => {
@@ -270,9 +285,20 @@ export default function HomePage() {
                 <Skeleton className="h-8 w-3/4 bg-primary-foreground/20" />
               </div>
             ) : (
-              <p className="text-2xl font-light">
-                &quot;{affirmation}&quot;
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <p className="text-2xl font-light flex-1">
+                  &quot;{affirmation}&quot;
+                </p>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleCopy}
+                  className="shrink-0 hover:bg-primary-foreground/20 text-primary-foreground"
+                >
+                  {isCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                  <span className="sr-only">Copy affirmation</span>
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -384,3 +410,5 @@ export default function HomePage() {
     </div>
   )
 }
+
+    
