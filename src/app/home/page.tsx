@@ -272,35 +272,33 @@ export default function HomePage() {
       
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Daily Affirmation Card */}
-        <Card className="col-span-3 lg:col-span-2 bg-primary text-primary-foreground flex flex-col transition-shadow hover:shadow-lg">
+        <Card className="col-span-3 lg:col-span-2 bg-primary text-primary-foreground transition-shadow hover:shadow-lg">
           <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2">
               <Sparkles /> Daily Affirmation
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col">
+          <CardContent className="relative">
             {loadingAffirmation ? (
-              <div className="space-y-2 flex-grow flex flex-col justify-center">
+              <div className="space-y-2">
                 <Skeleton className="h-8 w-full bg-primary-foreground/20" />
                 <Skeleton className="h-8 w-3/4 bg-primary-foreground/20" />
               </div>
             ) : (
-              <div className="flex-grow flex flex-col">
-                <p className="text-2xl font-light flex-1">
+              <>
+                <p className="text-2xl font-light pr-12">
                   &quot;{affirmation}&quot;
                 </p>
-                <div className="flex justify-end">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleCopy}
-                    className="shrink-0 hover:bg-primary-foreground/20 text-primary-foreground"
-                  >
-                    {isCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                    <span className="sr-only">Copy affirmation</span>
-                  </Button>
-                </div>
-              </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleCopy}
+                  className="absolute bottom-0 right-0 shrink-0 hover:bg-primary-foreground/20 text-primary-foreground"
+                >
+                  {isCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                  <span className="sr-only">Copy affirmation</span>
+                </Button>
+              </>
             )}
           </CardContent>
         </Card>
