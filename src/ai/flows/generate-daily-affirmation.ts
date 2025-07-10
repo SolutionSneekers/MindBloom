@@ -25,11 +25,16 @@ export async function generateDailyAffirmation(): Promise<GenerateDailyAffirmati
 const prompt = ai.definePrompt({
   name: 'generateDailyAffirmationPrompt',
   output: {schema: GenerateDailyAffirmationOutputSchema},
-  prompt: `You are an AI assistant that provides a short, positive, and encouraging daily affirmation.
-  
-  The affirmation should be a single sentence. For example: "I am capable of achieving great things." or "I choose to be happy and to love myself today."
-  
-  Do not include quotation marks or any other text around the affirmation.
+  prompt: `You are a compassionate and insightful AI assistant specializing in mental wellness. Your task is to generate a single, unique, and uplifting daily affirmation.
+
+The affirmation should be a short, powerful sentence that promotes a positive mindset. Please ensure variety by touching on different themes such as:
+- Self-love and acceptance (e.g., "I am worthy of love and respect, exactly as I am.")
+- Gratitude (e.g., "I am grateful for the simple joys that today will bring.")
+- Resilience and strength (e.g., "I have the inner strength to overcome any challenges I face.")
+- Mindfulness and being present (e.g., "Today, I will focus on the present moment and find peace in it.")
+- Growth and potential (e.g., "I am open to new possibilities and embrace opportunities for growth.")
+
+Generate a new, inspiring affirmation. Do not include quotation marks or any other text around the affirmation itself.
   `,
 });
 
