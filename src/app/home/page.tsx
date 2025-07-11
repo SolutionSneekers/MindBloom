@@ -270,17 +270,17 @@ export default function HomePage() {
         </Button>
       </div>
       
-      <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-5">
         {/* Daily Affirmation Card */}
-        <Card className="col-span-full lg:col-span-3 bg-primary text-primary-foreground transition-shadow hover:shadow-lg">
+        <Card className="col-span-full lg:col-span-3 bg-primary text-primary-foreground transition-shadow hover:shadow-lg flex flex-col">
           <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2">
               <Sparkles /> Daily Affirmation
             </CardTitle>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent className="relative flex-grow flex items-center">
             {loadingAffirmation ? (
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <Skeleton className="h-8 w-full bg-primary-foreground/20" />
                 <Skeleton className="h-8 w-3/4 bg-primary-foreground/20" />
               </div>
