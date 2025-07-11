@@ -270,9 +270,9 @@ export default function HomePage() {
         </Button>
       </div>
       
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-5">
         {/* Daily Affirmation Card */}
-        <Card className="col-span-3 lg:col-span-2 bg-primary text-primary-foreground transition-shadow hover:shadow-lg">
+        <Card className="col-span-full lg:col-span-3 bg-primary text-primary-foreground transition-shadow hover:shadow-lg">
           <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2">
               <Sparkles /> Daily Affirmation
@@ -304,7 +304,7 @@ export default function HomePage() {
         </Card>
 
         {/* Stats Card */}
-        <Card className="col-span-3 lg:col-span-1 transition-shadow hover:shadow-lg">
+        <Card className="col-span-full lg:col-span-2 transition-shadow hover:shadow-lg">
           <CardHeader>
             <CardTitle className="font-headline text-xl">Your Stats</CardTitle>
             <CardDescription>A summary of your recent activity.</CardDescription>
