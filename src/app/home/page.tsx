@@ -270,7 +270,7 @@ export default function HomePage() {
         </Button>
       </div>
       
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
         {/* Daily Affirmation Card */}
         <Card className="col-span-full lg:col-span-3 bg-primary text-primary-foreground transition-shadow hover:shadow-lg">
           <CardHeader>
