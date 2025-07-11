@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from "next/link"
@@ -81,7 +82,6 @@ export default function LoginPage() {
           lastName,
           email: user.email,
           photoURL: user.photoURL,
-          providerPhotoURL: user.photoURL,
           createdAt: serverTimestamp()
         });
       }

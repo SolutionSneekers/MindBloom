@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -6,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { auth, db } from '@/lib/firebase';
 import { updateProfile, onAuthStateChanged, User, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp, writeBatch } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useLogout } from '@/hooks/use-logout';
 
@@ -114,10 +115,14 @@ export default function ProfilePage() {
         const userDocRef = doc(db, 'users', currentUser.uid);
         const userDocSnap = await getDoc(userDocRef);
         let dob;
+        let firestorePhotoURL = currentUser.photoURL || '';
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
           if (userData.dob && userData.dob instanceof Timestamp) {
             dob = userData.dob.toDate();
+          }
+          if (userData.photoURL) {
+            firestorePhotoURL = userData.photoURL;
           }
           if (userData.lastUsedPhotoURL) {
             setLastUsedPhotoURL(userData.lastUsedPhotoURL);
@@ -129,7 +134,7 @@ export default function ProfilePage() {
         reset({
           firstName: firstName,
           lastName: lastName,
-          photoURL: currentUser.photoURL || '',
+          photoURL: firestorePhotoURL,
           dob: dob
         });
       }
@@ -167,10 +172,12 @@ export default function ProfilePage() {
     
     setIsSaving(true);
     try {
-      const oldPhotoURL = auth.currentUser.photoURL;
+      const batch = writeBatch(db);
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+
+      const oldPhotoURL = watch('photoURL');
       const newPhotoURL = data.photoURL;
 
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
       const firestoreUpdates: any = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -183,6 +190,10 @@ export default function ProfilePage() {
       if (oldPhotoURL && oldPhotoURL.startsWith('http') && newPhotoURL && newPhotoURL.startsWith('data:image')) {
         firestoreUpdates.lastUsedPhotoURL = oldPhotoURL;
         setLastUsedPhotoURL(oldPhotoURL); // Update client state immediately
+      } else if (newPhotoURL && newPhotoURL.startsWith('http')) {
+        // If they switch back to a real URL, clear the last used URL
+        firestoreUpdates.lastUsedPhotoURL = null;
+        setLastUsedPhotoURL(null);
       }
 
       await updateProfile(auth.currentUser, {
@@ -191,8 +202,8 @@ export default function ProfilePage() {
       });
 
       // Save/update user data in Firestore
-      await setDoc(userDocRef, firestoreUpdates, { merge: true });
-
+      batch.set(userDocRef, firestoreUpdates, { merge: true });
+      await batch.commit();
 
       setUser(auth.currentUser);
       toast({
@@ -324,7 +335,7 @@ export default function ProfilePage() {
                     <div className="flex flex-col sm:flex-row items-center gap-6">
                         <div className="relative group">
                             <Avatar className="h-20 w-20 border">
-                              <AvatarImage src={photoURL || user.photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
+                              <AvatarImage src={photoURL || "https://placehold.co/80x80.png"} alt={user.displayName || "User"} data-ai-hint="profile" />
                               <AvatarFallback>{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                             </Avatar>
                             <DialogTrigger asChild>
