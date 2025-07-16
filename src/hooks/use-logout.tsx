@@ -38,9 +38,9 @@ export function LogoutConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} asChild>
-            <Button variant="destructive">Log Out</Button>
-          </AlertDialogAction>
+          <Button variant="destructive" asChild>
+            <AlertDialogAction onClick={onConfirm}>Log Out</AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
