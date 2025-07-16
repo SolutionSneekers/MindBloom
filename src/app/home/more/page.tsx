@@ -19,7 +19,7 @@ const morePages = [
         icon: Settings,
     },
     {
-        title: "About MindBloom",
+        title: "About Us",
         description: "Learn more about our mission, principles, and how to get in touch.",
         href: "/home/more/about",
         icon: Info,
