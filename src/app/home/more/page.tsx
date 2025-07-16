@@ -7,13 +7,13 @@ import { User, Settings, Info } from 'lucide-react';
 
 const morePages = [
     {
-        title: "Profile & Account",
-        description: "Manage your personal details, password, and account settings.",
+        title: "Profile",
+        description: "Manage your personal details and account settings.",
         href: "/home/more/profile",
         icon: User,
     },
     {
-        title: "Appearance Settings",
+        title: "Settings",
         description: "Customize your application preferences, like theme.",
         href: "/home/more/settings",
         icon: Settings,
