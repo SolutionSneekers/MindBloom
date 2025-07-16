@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Pencil } from 'lucide-react';
+import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Pencil, Info } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { DatePickerDialog } from '@/components/ui/date-picker-dialog';
@@ -58,7 +58,7 @@ export default function ProfilePage() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { handleLogout } = useLogout();
+  const { handleLogout, LogoutDialog } = useLogout();
   
   // State for the avatar dialog
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
@@ -312,6 +312,7 @@ export default function ProfilePage() {
   
   return (
     <div className="space-y-6">
+      {LogoutDialog}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold font-headline">Profile</h1>
         <p className="text-muted-foreground">Manage your personal details and account information.</p>
@@ -554,12 +555,17 @@ export default function ProfilePage() {
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader>
           <CardTitle className="text-xl font-headline flex items-center gap-2">Account Actions</CardTitle>
-          <CardDescription>Manage your account session.</CardDescription>
+          <CardDescription>Manage your account session or view information about the app.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-center gap-4">
             <Button variant="destructive" onClick={handleLogout} className="w-full sm:w-auto">
               <LogOut className="mr-2 h-4 w-4" /> Log Out
+            </Button>
+             <Button variant="outline" asChild className="w-full sm:w-auto">
+              <Link href="/home/more/about">
+                <Info className="mr-2 h-4 w-4" /> About MindBloom
+              </Link>
             </Button>
           </div>
         </CardContent>

@@ -7,20 +7,20 @@ import { User, Settings, Info } from 'lucide-react';
 
 const morePages = [
     {
-        title: "Profile",
-        description: "Manage your personal details and account information.",
+        title: "Profile & Account",
+        description: "Manage your personal details, password, and account settings.",
         href: "/home/more/profile",
         icon: User,
     },
     {
-        title: "Settings",
+        title: "Appearance Settings",
         description: "Customize your application preferences, like theme.",
         href: "/home/more/settings",
         icon: Settings,
     },
     {
-        title: "About Us",
-        description: "Learn more about our mission and the team.",
+        title: "About MindBloom",
+        description: "Learn more about our mission, principles, and how to get in touch.",
         href: "/home/more/about",
         icon: Info,
     }
