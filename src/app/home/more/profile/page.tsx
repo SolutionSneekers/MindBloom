@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Pencil, Info } from 'lucide-react';
+import { LogOut, ChevronsUpDown, Eye, EyeOff, KeyRound, User as UserIcon, Pencil } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { DatePickerDialog } from '@/components/ui/date-picker-dialog';
@@ -568,3 +568,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

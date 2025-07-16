@@ -52,8 +52,10 @@ export function useLogout() {
   const router = useRouter();
   const { toast } = useToast();
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await signOut(auth);
       router.push('/');
@@ -64,6 +66,7 @@ export function useLogout() {
         variant: 'destructive',
       });
     } finally {
+      setIsLoggingOut(false);
       setIsConfirming(false);
     }
   };
@@ -83,3 +86,5 @@ export function useLogout() {
     )
   };
 }
+
+    
