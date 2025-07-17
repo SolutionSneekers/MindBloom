@@ -3,7 +3,7 @@
 
 import { useState, useEffect, FormEvent, useCallback, useMemo } from "react";
 import { auth, db } from "@/lib/firebase";
-import { collection, query, where, orderBy, getDocs, Timestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, Timestamp, doc, deleteDoc, updateDoc, limit, startAfter, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { moodToValue, moods } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -31,9 +31,15 @@ interface MoodHistoryEntry {
   createdAt: Timestamp;
 }
 
+const ENTRIES_PER_PAGE = 10;
+
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);
+  const [chartSourceData, setChartSourceData] = useState<MoodHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMore, setHasMore] = useState(true);
   
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -46,21 +52,33 @@ export default function MoodHistoryPage() {
   const [editStressLevel, setEditStressLevel] = useState([3]);
   const [editJournalEntry, setEditJournalEntry] = useState('');
 
-  const fetchMoodHistory = useCallback(async () => {
+  const fetchMoodHistory = useCallback(async (loadMore = false) => {
     if (!auth.currentUser) {
       setLoading(false);
       setMoodHistoryData([]);
       return;
     }
     
-    setLoading(true);
+    if (loadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setLoading(true);
+      setMoodHistoryData([]);
+    }
     
     try {
-      const q = query(
+      let q;
+      const baseQuery = [
         collection(db, "moods"),
         where("userId", "==", auth.currentUser.uid),
         orderBy("createdAt", "desc")
-      );
+      ];
+
+      if (loadMore && lastVisible) {
+        q = query(...baseQuery, startAfter(lastVisible), limit(ENTRIES_PER_PAGE));
+      } else {
+        q = query(...baseQuery, limit(ENTRIES_PER_PAGE));
+      }
       
       const querySnapshot = await getDocs(q);
       
@@ -80,7 +98,15 @@ export default function MoodHistoryPage() {
         }
       });
       
-      setMoodHistoryData(history);
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      setLastVisible(lastDoc || null);
+      setHasMore(querySnapshot.docs.length === ENTRIES_PER_PAGE);
+
+      if (!loadMore) {
+        setChartSourceData(history); // Set data for the chart from the first fetch
+      }
+      
+      setMoodHistoryData(prev => loadMore ? [...prev, ...history] : history);
     } catch (error) {
       console.error("Error fetching mood history:", error);
        toast({
@@ -90,8 +116,9 @@ export default function MoodHistoryPage() {
       });
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [toast]);
+  }, [toast, lastVisible]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -103,14 +130,14 @@ export default function MoodHistoryPage() {
         }
     });
 
-    return () => unsubscribe();
-  }, [fetchMoodHistory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const chartData = useMemo(() => {
-    if (moodHistoryData.length === 0) {
+    if (chartSourceData.length === 0) {
       return [];
     }
-    const last7Days = moodHistoryData.slice(0, 7).reverse();
+    const last7Days = chartSourceData.slice(0, 7).reverse();
     const newChartData: MoodChartData[] = last7Days.map(entry => {
          const date = new Date(entry.date);
          if (isNaN(date.getTime())) {
@@ -126,7 +153,7 @@ export default function MoodHistoryPage() {
          };
     }).filter((item): item is MoodChartData => item !== null);
     return newChartData;
-  }, [moodHistoryData]);
+  }, [chartSourceData]);
 
   const handleOpenEditDialog = (entry: MoodHistoryEntry) => {
     setSelectedEntry(entry);
@@ -176,7 +203,7 @@ export default function MoodHistoryPage() {
         stressLevel: editStressLevel[0],
         journalEntry: editJournalEntry,
       });
-      await fetchMoodHistory();
+      fetchMoodHistory(); // Refetch all to get latest data
       toast({
         title: "Success",
         description: "Mood entry updated.",
@@ -325,6 +352,24 @@ export default function MoodHistoryPage() {
                   )})}
                 </TableBody>
               </Table>
+              {hasMore && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    variant="secondary"
+                    onClick={() => fetchMoodHistory(true)}
+                    disabled={isLoadingMore}
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Load More"
+                    )}
+                  </Button>
+                </div>
+              )}
             </ScrollArea>
           ) : (
             <div className="w-full overflow-x-auto">
@@ -438,5 +483,7 @@ export default function MoodHistoryPage() {
     </div>
   )
 }
+
+    
 
     

@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, FormEvent } from 'react';
 import { generateJournalingPrompts } from '@/ai/flows/generate-journaling-prompts';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc, limit, startAfter, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { calculateAge } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ interface JournalEntry {
 
 const moods = ['Happy', 'Calm', 'Okay', 'Sad', 'Anxious', 'Angry'];
 const TRUNCATE_LENGTH = 250;
-
+const ENTRIES_PER_PAGE = 10;
 
 export default function JournalPage() {
   const { toast } = useToast();
@@ -47,6 +47,9 @@ export default function JournalPage() {
   // State for past entries
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [isLoadingEntries, setIsLoadingEntries] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMore, setHasMore] = useState(true);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   // State for dialogs
@@ -57,27 +60,40 @@ export default function JournalPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  const fetchJournalEntries = useCallback(async () => {
+  const fetchJournalEntries = useCallback(async (loadMore = false) => {
     if (!auth.currentUser) {
       setIsLoadingEntries(false);
       return;
     }
-    setIsLoadingEntries(true);
+
+    if (loadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoadingEntries(true);
+      setPastEntries([]);
+    }
 
     try {
-      const q = query(
+      let q;
+      const baseQuery = [
         collection(db, "journalEntries"),
         where("userId", "==", auth.currentUser.uid),
-        orderBy("createdAt", "desc")
-      );
+        orderBy("createdAt", "desc"),
+      ];
+
+      if (loadMore && lastVisible) {
+        q = query(...baseQuery, startAfter(lastVisible), limit(ENTRIES_PER_PAGE));
+      } else {
+        q = query(...baseQuery, limit(ENTRIES_PER_PAGE));
+      }
 
       const querySnapshot = await getDocs(q);
-      const entries: JournalEntry[] = [];
+      const newEntries: JournalEntry[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.createdAt) {
           const timestamp = data.createdAt as Timestamp;
-          entries.push({
+          newEntries.push({
             id: doc.id,
             entry: data.entry,
             mood: data.mood,
@@ -87,7 +103,12 @@ export default function JournalPage() {
           });
         }
       });
-      setPastEntries(entries);
+      
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      setLastVisible(lastDoc || null);
+      setHasMore(querySnapshot.docs.length === ENTRIES_PER_PAGE);
+      setPastEntries(prev => loadMore ? [...prev, ...newEntries] : newEntries);
+
     } catch (error) {
       console.error("Error fetching journal entries:", error);
       toast({
@@ -97,8 +118,9 @@ export default function JournalPage() {
       });
     } finally {
       setIsLoadingEntries(false);
+      setIsLoadingMore(false);
     }
-  }, [toast]);
+  }, [toast, lastVisible]);
 
 
   useEffect(() => {
@@ -130,7 +152,8 @@ export default function JournalPage() {
       }
     });
     return () => unsubscribe();
-  }, [fetchJournalEntries, fetchUserAge]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchUserAge]);
 
   const handleGetPrompt = useCallback(async (mood: string) => {
     setSelectedMood(mood);
@@ -413,6 +436,20 @@ export default function JournalPage() {
                               </Card>
                               )
                           })}
+                          {hasMore && (
+                            <div className="flex justify-center pt-4">
+                              <Button onClick={() => fetchJournalEntries(true)} disabled={isLoadingMore}>
+                                {isLoadingMore ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Loading...
+                                  </>
+                                ) : (
+                                  "Load More"
+                                )}
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </ScrollArea>
                   ) : (
@@ -477,3 +514,5 @@ export default function JournalPage() {
     </div>
   );
 }
+
+    
