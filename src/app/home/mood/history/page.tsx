@@ -3,7 +3,7 @@
 
 import { useState, useEffect, FormEvent, useCallback, useMemo } from "react";
 import { auth, db } from "@/lib/firebase";
-import { collection, query, where, orderBy, limit, getDocs, Timestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, Timestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import MoodHistoryChart, { MoodChartData } from "@/components/mood-history-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { moodToValue, moods } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MoodHistoryEntry {
   id: string;
@@ -27,15 +28,12 @@ interface MoodHistoryEntry {
   mood: string;
   stressLevel: number;
   journalEntry: string;
+  createdAt: Timestamp;
 }
-
-const INITIAL_LOAD_COUNT = 7;
 
 export default function MoodHistoryPage() {
   const [moodHistoryData, setMoodHistoryData] = useState<MoodHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -48,29 +46,21 @@ export default function MoodHistoryPage() {
   const [editStressLevel, setEditStressLevel] = useState([3]);
   const [editJournalEntry, setEditJournalEntry] = useState('');
 
-  const fetchMoodHistory = useCallback(async (loadAll = false) => {
+  const fetchMoodHistory = useCallback(async () => {
     if (!auth.currentUser) {
       setLoading(false);
       setMoodHistoryData([]);
       return;
     }
     
-    if (loadAll) {
-      setLoadingMore(true);
-    } else {
-      setLoading(true);
-    }
+    setLoading(true);
     
     try {
-      let q = query(
+      const q = query(
         collection(db, "moods"),
         where("userId", "==", auth.currentUser.uid),
         orderBy("createdAt", "desc")
       );
-
-      if (!loadAll) {
-        q = query(q, limit(INITIAL_LOAD_COUNT));
-      }
       
       const querySnapshot = await getDocs(q);
       
@@ -78,26 +68,19 @@ export default function MoodHistoryPage() {
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.createdAt) {
-          const createdAt = (data.createdAt as Timestamp).toDate();
-
+          const createdAt = (data.createdAt as Timestamp);
           history.push({
             id: doc.id,
-            date: createdAt.toISOString(),
+            date: createdAt.toDate().toISOString(),
             mood: data.mood,
             stressLevel: data.stressLevel,
             journalEntry: data.journalEntry || '',
+            createdAt: createdAt,
           });
         }
       });
       
       setMoodHistoryData(history);
-
-      if (!loadAll) {
-        setHasMore(history.length === INITIAL_LOAD_COUNT);
-      } else {
-        setHasMore(false);
-      }
-
     } catch (error) {
       console.error("Error fetching mood history:", error);
        toast({
@@ -107,7 +90,6 @@ export default function MoodHistoryPage() {
       });
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   }, [toast]);
 
@@ -194,7 +176,7 @@ export default function MoodHistoryPage() {
         stressLevel: editStressLevel[0],
         journalEntry: editJournalEntry,
       });
-      await fetchMoodHistory(!hasMore);
+      await fetchMoodHistory();
       toast({
         title: "Success",
         description: "Mood entry updated.",
@@ -211,7 +193,7 @@ export default function MoodHistoryPage() {
       setIsEditDialogOpen(false);
       setSelectedEntry(null);
     }
-  }, [selectedEntry, editMood, editStressLevel, editJournalEntry, fetchMoodHistory, toast, hasMore]);
+  }, [selectedEntry, editMood, editStressLevel, editJournalEntry, fetchMoodHistory, toast]);
   
   return (
     <div className="space-y-6">
@@ -226,7 +208,7 @@ export default function MoodHistoryPage() {
         <CardHeader>
           <CardTitle className="font-headline text-xl">Mood Trends</CardTitle>
           <CardDescription>
-            A visual overview of your mood fluctuations over the last 7 entries.
+            A visual overview of your mood fluctuations over your last 7 entries.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -238,7 +220,7 @@ export default function MoodHistoryPage() {
         <CardHeader>
           <CardTitle className="font-headline text-xl">Mood Check-in Log</CardTitle>
           <CardDescription>
-            A detailed log of your recent mood entries. You can edit or delete entries here.
+            A detailed log of all your mood entries. You can edit or delete entries here.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -280,84 +262,89 @@ export default function MoodHistoryPage() {
                   </TableBody>
                 </Table>
               </div>
-          ) : (
-            <>
-              <div className="w-full overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="hidden md:table-cell">Date</TableHead>
-                      <TableHead>Mood</TableHead>
-                      <TableHead className="text-center">Stress</TableHead>
-                      <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+          ) : moodHistoryData.length > 0 ? (
+            <ScrollArea className="h-[400px] w-full pr-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                    <TableHead>Mood</TableHead>
+                    <TableHead className="text-center">Stress</TableHead>
+                    <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {moodHistoryData.map((entry) => {
+                    const displayDate = new Date(entry.date).toLocaleDateString();
+                    return (
+                    <TableRow key={entry.id}>
+                       <TableCell className="hidden md:table-cell font-medium">{displayDate}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Badge
+                            variant={
+                              entry.mood === 'Angry' ? 'destructive'
+                              : entry.mood === 'Happy' ? 'default'
+                              : 'secondary'
+                            }
+                            className="w-fit"
+                          >
+                            {entry.mood}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground md:hidden">{displayDate}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">{entry.stressLevel}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <p className="max-w-xs truncate text-muted-foreground italic">
+                          &quot;{entry.journalEntry || 'No journal entry.'}&quot;
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-right">
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                <span>Edit</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Delete</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {moodHistoryData.length > 0 ? moodHistoryData.map((entry) => {
-                      const displayDate = new Date(entry.date).toLocaleDateString();
-                      return (
-                      <TableRow key={entry.id}>
-                         <TableCell className="hidden md:table-cell font-medium">{displayDate}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <Badge
-                              variant={
-                                entry.mood === 'Angry' ? 'destructive'
-                                : entry.mood === 'Happy' ? 'default'
-                                : 'secondary'
-                              }
-                              className="w-fit"
-                            >
-                              {entry.mood}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground md:hidden">{displayDate}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">{entry.stressLevel}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <p className="max-w-xs truncate text-muted-foreground italic">
-                            &quot;{entry.journalEntry || 'No journal entry.'}&quot;
-                          </p>
-                        </TableCell>
-                        <TableCell className="text-right">
-                           <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <span className="sr-only">Open menu</span>
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleOpenEditDialog(entry)}>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  <span>Edit</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleOpenDeleteDialog(entry)} className="text-destructive focus:text-destructive">
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Delete</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    )}) : (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center h-24">No mood check-ins yet.</TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-              {hasMore && (
-                <div className="mt-6 flex justify-center">
-                  <Button variant="outline" onClick={() => fetchMoodHistory(true)} disabled={loadingMore}>
-                    {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    {loadingMore ? 'Loading...' : 'Show All Entries'}
-                  </Button>
-                </div>
-              )}
-            </>
+                  )})}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                    <TableHead>Mood</TableHead>
+                    <TableHead className="text-center">Stress</TableHead>
+                    <TableHead className="hidden md:table-cell">Journal Snippet</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center h-24">No mood check-ins yet.</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -451,3 +438,5 @@ export default function MoodHistoryPage() {
     </div>
   )
 }
+
+    
