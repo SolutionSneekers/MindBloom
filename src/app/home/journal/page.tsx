@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, FormEvent } from 'react';
 import { generateJournalingPrompts } from '@/ai/flows/generate-journaling-prompts';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc, limit } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { calculateAge } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,6 @@ interface JournalEntry {
 
 const moods = ['Happy', 'Calm', 'Okay', 'Sad', 'Anxious', 'Angry'];
 const TRUNCATE_LENGTH = 250;
-const INITIAL_LOAD_COUNT = 3;
 
 
 export default function JournalPage() {
@@ -48,8 +47,6 @@ export default function JournalPage() {
   // State for past entries
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [isLoadingEntries, setIsLoadingEntries] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
 
   // State for dialogs
@@ -60,28 +57,19 @@ export default function JournalPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  const fetchJournalEntries = useCallback(async (loadAll = false) => {
+  const fetchJournalEntries = useCallback(async () => {
     if (!auth.currentUser) {
       setIsLoadingEntries(false);
       return;
     }
-
-    if (loadAll) {
-      setLoadingMore(true);
-    } else {
-      setIsLoadingEntries(true);
-    }
+    setIsLoadingEntries(true);
 
     try {
-      let q = query(
+      const q = query(
         collection(db, "journalEntries"),
         where("userId", "==", auth.currentUser.uid),
         orderBy("createdAt", "desc")
       );
-
-      if (!loadAll) {
-        q = query(q, limit(INITIAL_LOAD_COUNT));
-      }
 
       const querySnapshot = await getDocs(q);
       const entries: JournalEntry[] = [];
@@ -100,11 +88,6 @@ export default function JournalPage() {
         }
       });
       setPastEntries(entries);
-      if (!loadAll) {
-        setHasMore(entries.length === INITIAL_LOAD_COUNT);
-      } else {
-        setHasMore(false);
-      }
     } catch (error) {
       console.error("Error fetching journal entries:", error);
       toast({
@@ -114,7 +97,6 @@ export default function JournalPage() {
       });
     } finally {
       setIsLoadingEntries(false);
-      setLoadingMore(false);
     }
   }, [toast]);
 
@@ -362,7 +344,7 @@ export default function JournalPage() {
                   <CardTitle className="font-headline text-xl">Past Entries</CardTitle>
                   <CardDescription>Review and manage your previous journal entries.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent>
                   {isLoadingEntries ? (
                       <div className="space-y-4">
                       {[...Array(3)].map((_, i) => (
@@ -383,7 +365,6 @@ export default function JournalPage() {
                       ))}
                       </div>
                   ) : pastEntries.length > 0 ? (
-                      <>
                       <ScrollArea className="h-[700px] pr-4">
                         <div className="space-y-4">
                           {pastEntries.map((entry) => {
@@ -434,15 +415,6 @@ export default function JournalPage() {
                           })}
                         </div>
                       </ScrollArea>
-                      {hasMore && (
-                          <div className="mt-6 flex justify-center">
-                          <Button variant="outline" onClick={() => fetchJournalEntries(true)} disabled={loadingMore}>
-                              {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                              {loadingMore ? 'Loading...' : 'Show All Entries'}
-                          </Button>
-                          </div>
-                      )}
-                      </>
                   ) : (
                       <p className="text-center text-muted-foreground py-8">You have no past journal entries.</p>
                   )}
@@ -505,5 +477,3 @@ export default function JournalPage() {
     </div>
   );
 }
-
-    
