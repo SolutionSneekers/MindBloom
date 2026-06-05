@@ -79,7 +79,7 @@ export default function JournalPage() {
         collection(db, "journalEntries"),
         where("userId", "==", auth.currentUser.uid),
         orderBy("createdAt", "desc"),
-      ];
+      ] as const;
 
       if (loadMore && lastVisible) {
         q = query(...baseQuery, startAfter(lastVisible), limit(ENTRIES_PER_PAGE));
@@ -462,10 +462,10 @@ export default function JournalPage() {
 
       
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
-        setIsEditDialogOpen(open);
-        if (!open) setSelectedEntry(null);
-      }}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(open: boolean) => {
+  setIsEditDialogOpen(open);
+  if (!open) setSelectedEntry(null);
+}}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Journal Entry</DialogTitle>
