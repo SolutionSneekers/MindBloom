@@ -1,7 +1,7 @@
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai'; // Updated package
+import { googleAI } from '@genkit-ai/google-genai';
 
 export const ai = genkit({
   plugins: [googleAI()],
-  model: 'googleAI/gemini-2.5-flash', // Corrected casing string
+  model: 'googleAI/gemini-1.5-flash', // Corrected to a stable Gemini model version
 });

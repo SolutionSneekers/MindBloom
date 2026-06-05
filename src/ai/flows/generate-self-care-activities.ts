@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for generating personalized self-care activity suggestions based on the user's mood.
@@ -36,9 +35,9 @@ const GenerateSelfCareActivitiesOutputSchema = z.object({
       z.object({
         title: z.string().describe('The title of the activity.'),
         category: z
-          .string()
+          .enum(['Breathing', 'Journaling', 'Movement', 'Music', 'Games', 'Surprise Me'])
           .describe(
-            'The category of the activity. Must be one of: Breathing, Journaling, Movement, Music, Games, Surprise Me.'
+            'The category of the activity.'
           ),
         description: z
           .string()
